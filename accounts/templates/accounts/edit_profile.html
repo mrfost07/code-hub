@@ -1,0 +1,88 @@
+{% extends 'base.html' %}
+
+{% block title %}Edit Profile{% endblock %}
+
+{% block content %}
+<section class="content">
+  <div class="container-fluid">
+    <div class="row">
+      <div class="col-md-6 mx-auto">
+        <div class="card card-primary">
+          <div class="card-header">
+            <h3 class="card-title">Edit Profile</h3>
+          </div>
+          <!-- /.card-header -->
+          <!-- form start -->
+          <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            <div class="card-body">
+              {% if messages %}
+                {% for message in messages %}
+                  <div class="alert alert-{{ message.tags }}">
+                    {{ message }}
+                  </div>
+                {% endfor %}
+              {% endif %}
+              
+              <div class="form-group text-center">
+                <img src="{{ request.user.profile.profile_picture_url }}" class="profile-user-img img-fluid img-circle" alt="User profile picture">
+                <div class="mt-2">
+                  <label for="{{ form.profile_picture.id_for_label }}" class="btn btn-secondary">Change Profile Picture</label>
+                  {{ form.profile_picture }}
+                  <style>
+                    input[type="file"] {
+                      display: none;
+                    }
+                  </style>
+                </div>
+                {% if form.profile_picture.errors %}
+                  <div class="text-danger">
+                    {{ form.profile_picture.errors }}
+                  </div>
+                {% endif %}
+              </div>
+              
+              <div class="form-group">
+                <label for="{{ form.bio.id_for_label }}">Bio</label>
+                {{ form.bio }}
+                {% if form.bio.errors %}
+                  <div class="text-danger">
+                    {{ form.bio.errors }}
+                  </div>
+                {% endif %}
+              </div>
+              
+              <div class="form-group">
+                <label for="{{ form.location.id_for_label }}">Location</label>
+                {{ form.location }}
+                {% if form.location.errors %}
+                  <div class="text-danger">
+                    {{ form.location.errors }}
+                  </div>
+                {% endif %}
+              </div>
+              
+              <div class="form-group">
+                <label for="{{ form.date_of_birth.id_for_label }}">Date of Birth</label>
+                {{ form.date_of_birth }}
+                {% if form.date_of_birth.errors %}
+                  <div class="text-danger">
+                    {{ form.date_of_birth.errors }}
+                  </div>
+                {% endif %}
+              </div>
+            </div>
+            <!-- /.card-body -->
+
+            <div class="card-footer">
+              <button type="submit" class="btn btn-primary">Save Changes</button>
+              <a href="{% url 'accounts:profile' %}" class="btn btn-default float-right">Cancel</a>
+            </div>
+          </form>
+        </div>
+        <!-- /.card -->
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %} 

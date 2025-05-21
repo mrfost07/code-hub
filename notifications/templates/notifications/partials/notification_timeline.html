@@ -1,0 +1,65 @@
+<div class="timeline">
+  {% for notification in notifications %}
+    {% ifchanged notification.created_at|date:"Y-m-d" %}
+      <div class="time-label">
+        <span class="bg-primary">{{ notification.created_at|date:"d M Y" }}</span>
+      </div>
+    {% endifchanged %}
+    
+    <div>
+      {% if 'created' in notification.verb %}
+        <i class="fas fa-plus-circle bg-success"></i>
+      {% elif 'updated' in notification.verb or 'changed' in notification.verb %}
+        <i class="fas fa-edit bg-primary"></i>
+      {% elif 'added' in notification.verb %}
+        <i class="fas fa-user-plus bg-info"></i>
+      {% elif 'progress' in notification.verb or 'moved' in notification.verb or 'status' in notification.verb %}
+        <i class="fas fa-tasks bg-warning"></i>
+      {% else %}
+        <i class="fas fa-bell bg-{% if notification.read %}info{% else %}warning{% endif %}"></i>
+      {% endif %}
+      
+      <div class="timeline-item">
+        <span class="time"><i class="fas fa-clock"></i> {{ notification.notification_time_formatted }}</span>
+        <h3 class="timeline-header">
+          <strong>{{ notification.actor.username }}</strong> {{ notification.verb }}
+        </h3>
+        <div class="timeline-body">
+          {% if notification.content_object %}
+            {% if 'Project' in notification.content_object|stringformat:"s" %}
+              <a href="{% url 'projects:project_detail' notification.object_id %}" class="btn btn-sm btn-outline-primary">
+                <i class="fas fa-project-diagram mr-1"></i> View Project
+              </a>
+            {% elif 'Task' in notification.content_object|stringformat:"s" %}
+              <a href="{% url 'tasks:task_detail' notification.object_id %}" class="btn btn-sm btn-outline-info">
+                <i class="fas fa-tasks mr-1"></i> View Task
+              </a>
+            {% elif 'Team' in notification.content_object|stringformat:"s" %}
+              <a href="{% url 'teams:team_detail' notification.object_id %}" class="btn btn-sm btn-outline-success">
+                <i class="fas fa-users mr-1"></i> View Team
+              </a>
+            {% endif %}
+          {% else %}
+            <span class="badge badge-secondary">Referenced item may have been deleted</span>
+          {% endif %}
+        </div>
+        <div class="timeline-footer">
+          {% if not notification.read %}
+            <a href="{% url 'notifications:mark_as_read' notification.id %}" class="btn btn-primary btn-sm">Mark as Read</a>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  {% empty %}
+    <div class="alert alert-info">
+      <h5><i class="icon fas fa-info"></i> No notifications</h5>
+      <p>You don't have any notifications in this category yet.</p>
+    </div>
+  {% endfor %}
+
+  {% if notifications %}
+    <div>
+      <i class="fas fa-clock bg-gray"></i>
+    </div>
+  {% endif %}
+</div> 

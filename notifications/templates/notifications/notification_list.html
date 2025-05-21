@@ -1,0 +1,136 @@
+{% extends 'base.html' %}
+
+{% block title %}Notifications{% endblock %}
+
+{% block content %}
+<section class="content-header">
+  <div class="container-fluid">
+    <div class="row mb-2">
+      <div class="col-sm-6">
+        <h1>Notifications</h1>
+      </div>
+      <div class="col-sm-6">
+        <ol class="breadcrumb float-sm-right">
+          <li class="breadcrumb-item"><a href="{% url 'accounts:dashboard' %}">Home</a></li>
+          <li class="breadcrumb-item active">Notifications</li>
+        </ol>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="content">
+  <div class="container-fluid">
+    <!-- Notification Categories -->
+    <div class="row">
+      <div class="col-md-3 col-sm-6 col-12">
+        <div class="info-box">
+          <span class="info-box-icon bg-info"><i class="fas fa-tasks"></i></span>
+          <div class="info-box-content">
+            <span class="info-box-text">Progress Updates</span>
+            <span class="info-box-number">{{ categorized_notifications.progress|length }}</span>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-3 col-sm-6 col-12">
+        <div class="info-box">
+          <span class="info-box-icon bg-success"><i class="fas fa-user-plus"></i></span>
+          <div class="info-box-content">
+            <span class="info-box-text">Team Membership</span>
+            <span class="info-box-number">{{ categorized_notifications.member|length }}</span>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-3 col-sm-6 col-12">
+        <div class="info-box">
+          <span class="info-box-icon bg-warning"><i class="fas fa-plus-circle"></i></span>
+          <div class="info-box-content">
+            <span class="info-box-text">New Tasks</span>
+            <span class="info-box-number">{{ categorized_notifications.creation|length }}</span>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-3 col-sm-6 col-12">
+        <div class="info-box">
+          <span class="info-box-icon bg-danger"><i class="fas fa-bell"></i></span>
+          <div class="info-box-content">
+            <span class="info-box-text">Project & Task Updates</span>
+            <span class="info-box-number">{{ categorized_notifications.updates|length }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col-12">
+        <div class="card card-primary card-tabs">
+          <div class="card-header p-0 pt-1">
+            <ul class="nav nav-tabs" id="notification-tabs" role="tablist">
+              <li class="nav-item">
+                <a class="nav-link active" id="all-tab" data-toggle="pill" href="#all" role="tab" aria-controls="all" aria-selected="true">All Notifications</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" id="progress-tab" data-toggle="pill" href="#progress" role="tab" aria-controls="progress" aria-selected="false">Progress</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" id="members-tab" data-toggle="pill" href="#members" role="tab" aria-controls="members" aria-selected="false">Team Membership</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" id="creation-tab" data-toggle="pill" href="#creation" role="tab" aria-controls="creation" aria-selected="false">New Tasks</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" id="updates-tab" data-toggle="pill" href="#updates" role="tab" aria-controls="updates" aria-selected="false">Updates</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" id="profile-tab" data-toggle="pill" href="#profile" role="tab" aria-controls="profile" aria-selected="false">Profile</a>
+              </li>
+              <li class="nav-item ml-auto mr-2 pt-1">
+                <a href="{% url 'notifications:mark_all_as_read' %}" class="btn btn-sm btn-outline-primary">
+                  <i class="fas fa-check-double mr-1"></i> Mark All as Read
+                </a>
+                <a href="{% url 'notifications:cleanup_notifications' %}" class="btn btn-sm btn-outline-danger ml-2" 
+                   onclick="return confirm('This will remove all notifications referring to deleted items. Continue?');">
+                  <i class="fas fa-broom mr-1"></i> Clean Up
+                </a>
+              </li>
+            </ul>
+          </div>
+          <div class="card-body">
+            <div class="tab-content" id="notification-content">
+              <!-- All Notifications Tab -->
+              <div class="tab-pane fade show active" id="all" role="tabpanel" aria-labelledby="all-tab">
+                {% include 'notifications/partials/notification_timeline.html' with notifications=latest_notifications %}
+              </div>
+              
+              <!-- Progress Notifications Tab -->
+              <div class="tab-pane fade" id="progress" role="tabpanel" aria-labelledby="progress-tab">
+                {% include 'notifications/partials/notification_timeline.html' with notifications=categorized_notifications.progress %}
+              </div>
+              
+              <!-- Members Notifications Tab -->
+              <div class="tab-pane fade" id="members" role="tabpanel" aria-labelledby="members-tab">
+                {% include 'notifications/partials/notification_timeline.html' with notifications=categorized_notifications.member %}
+              </div>
+              
+              <!-- Creation Notifications Tab -->
+              <div class="tab-pane fade" id="creation" role="tabpanel" aria-labelledby="creation-tab">
+                {% include 'notifications/partials/notification_timeline.html' with notifications=categorized_notifications.creation %}
+              </div>
+              
+              <!-- Updates Notifications Tab -->
+              <div class="tab-pane fade" id="updates" role="tabpanel" aria-labelledby="updates-tab">
+                {% include 'notifications/partials/notification_timeline.html' with notifications=categorized_notifications.updates %}
+              </div>
+              
+              <!-- Profile Notifications Tab -->
+              <div class="tab-pane fade" id="profile" role="tabpanel" aria-labelledby="profile-tab">
+                {% include 'notifications/partials/notification_timeline.html' with notifications=categorized_notifications.profile %}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %} 

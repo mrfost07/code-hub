@@ -1,0 +1,74 @@
+{% extends 'base.html' %}
+
+{% block title %}Teams{% endblock %}
+
+{% block content %}
+<section class="content-header">
+  <div class="container-fluid">
+    <div class="row mb-2">
+      <div class="col-sm-6">
+        <h1>Teams</h1>
+      </div>
+      <div class="col-sm-6">
+        <ol class="breadcrumb float-sm-right">
+          <li class="breadcrumb-item"><a href="{% url 'accounts:dashboard' %}">Home</a></li>
+          <li class="breadcrumb-item active">Teams</li>
+        </ol>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="content">
+  <div class="container-fluid">
+    <div class="row">
+      {% for team in teams %}
+      <div class="col-md-4">
+        <div class="card card-widget widget-user-2">
+          <div class="card-header">
+            <h3 class="card-title">{{ team.name }}</h3>
+            <div class="card-tools">
+              <a href="{% url 'teams:team_detail' team.id %}" class="btn btn-tool">
+                <i class="fas fa-eye"></i>
+              </a>
+            </div>
+          </div>
+          <div class="card-body">
+            <p>{{ team.description|truncatechars:100 }}</p>
+            <strong>Lead:</strong> <a href="{% url 'accounts:view_profile' team.team_lead.id %}">{{ team.team_lead.username }}</a>
+          </div>
+          <div class="card-footer p-0">
+            <ul class="nav flex-column">
+              <li class="nav-item">
+                <a href="#" class="nav-link">
+                  Members <span class="float-right badge bg-primary">{{ team.members.count }}</span>
+                </a>
+              </li>
+              <li class="nav-item">
+                <a href="#" class="nav-link">
+                  Projects <span class="float-right badge bg-info">{{ team.projects.count }}</span>
+                </a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+      {% empty %}
+      <div class="col-12">
+        <div class="alert alert-info">
+          No teams found. Create a new team to get started.
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    
+    <div class="row mt-4">
+      <div class="col-12">
+        <a href="{% url 'teams:team_create' %}" class="btn btn-success">
+          <i class="fas fa-plus"></i> Create New Team
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

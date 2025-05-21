@@ -1,0 +1,497 @@
+{% extends 'base.html' %}
+
+{% block title %}User Profile{% endblock %}
+
+{% block content %}
+<section class="content">
+  <div class="container-fluid">
+    <div class="row">
+      <div class="col-md-3">
+
+        <!-- Profile Image -->
+        <div class="card card-primary card-outline">
+          <div class="card-body box-profile">
+            <div class="text-center">
+              <img class="profile-user-img img-fluid img-circle"
+                   src="{{ user.profile.profile_picture_url }}"
+                   alt="User profile picture">
+            </div>
+
+            <h3 class="profile-username text-center">{{ user.profile.full_name }}</h3>
+
+            <p class="text-muted text-center">{{ user.email }}</p>
+
+            <ul class="list-group list-group-unbordered mb-3">
+              <li class="list-group-item">
+                <b>Joined</b> <a class="float-right">{{ user.profile.date_joined }}</a>
+              </li>
+              <li class="list-group-item">
+                <b>Projects</b> <a class="float-right">{{ projects|length }}</a>
+              </li>
+              <li class="list-group-item">
+                <b>Tasks</b> <a class="float-right">{{ tasks|length }}</a>
+              </li>
+            </ul>
+
+            {% if is_own_profile %}
+            <a href="{% url 'accounts:edit_profile' %}" class="btn btn-primary btn-block"><b>Edit Profile</b></a>
+            {% endif %}
+          </div>
+          <!-- /.card-body -->
+        </div>
+        <!-- /.card -->
+
+        <!-- About Me Box -->
+        <div class="card card-primary">
+          <div class="card-header">
+            <h3 class="card-title">About Me</h3>
+          </div>
+          <!-- /.card-header -->
+          <div class="card-body">
+            <strong><i class="fas fa-book mr-1"></i> Bio</strong>
+
+            <p class="text-muted">
+              {{ user.profile.bio|default:"No bio provided yet." }}
+            </p>
+
+            <hr>
+
+            <strong><i class="fas fa-map-marker-alt mr-1"></i> Location</strong>
+
+            <p class="text-muted">{{ user.profile.location|default:"No location provided yet." }}</p>
+
+            <hr>
+
+            <strong><i class="fas fa-calendar mr-1"></i> Date of Birth</strong>
+
+            <p class="text-muted">{{ user.profile.date_of_birth|default:"Not provided" }}</p>
+          </div>
+          <!-- /.card-body -->
+        </div>
+        <!-- /.card -->
+      </div>
+      <!-- /.col -->
+      <div class="col-md-9">
+        <div class="card">
+          <div class="card-header p-2">
+            <ul class="nav nav-pills">
+              <li class="nav-item"><a class="nav-link active" href="#activity" data-toggle="tab">Activity</a></li>
+              <li class="nav-item"><a class="nav-link" href="#projects" data-toggle="tab">Projects</a></li>
+              <li class="nav-item"><a class="nav-link" href="#tasks" data-toggle="tab">Tasks</a></li>
+              <li class="nav-item"><a class="nav-link" href="#analytics" data-toggle="tab">Analytics</a></li>
+            </ul>
+          </div><!-- /.card-header -->
+          <div class="card-body">
+            <div class="tab-content">
+              <div class="active tab-pane" id="activity">
+                <!-- Activity content -->
+                <div class="post">
+                  {% if is_own_profile %}
+                    {% if notifications %}
+                      {% for notification in notifications %}
+                        <div class="user-block">
+                          <span class="description">{{ notification.notification_time_formatted }}</span>
+                          <p>{{ notification.verb }}</p>
+                        </div>
+                      {% endfor %}
+                    {% else %}
+                      <div class="alert alert-info">
+                        <h5><i class="icon fas fa-info"></i> No recent activity found</h5>
+                        <p>Your activity will appear here when you:</p>
+                        <ul>
+                          <li>Create or update projects</li>
+                          <li>Create or update tasks</li>
+                          <li>Join or leave teams</li>
+                          <li>Comment on tasks</li>
+                        </ul>
+                        <p>Start by exploring the <a href="{% url 'projects:project_list' %}">Projects</a> or <a href="{% url 'tasks:task_list' %}">Tasks</a> sections!</p>
+                      </div>
+                      
+                      <!-- Recent Actions -->
+                      <div class="card">
+                        <div class="card-header">
+                          <h3 class="card-title">Your Recent Actions</h3>
+                        </div>
+                        <div class="card-body p-0">
+                          <ul class="list-group list-group-flush">
+                            {% if projects %}
+                              <li class="list-group-item">
+                                <i class="fas fa-project-diagram text-primary mr-2"></i>
+                                You're involved in {{ projects|length }} project{% if projects|length != 1 %}s{% endif %}
+                              </li>
+                            {% endif %}
+                            
+                            {% if tasks %}
+                              <li class="list-group-item">
+                                <i class="fas fa-tasks text-info mr-2"></i>
+                                You have {{ tasks|length }} assigned task{% if tasks|length != 1 %}s{% endif %}
+                              </li>
+                            {% endif %}
+                          </ul>
+                        </div>
+                      </div>
+                    {% endif %}
+                  {% else %}
+                    <!-- Viewing someone else's profile -->
+                    <div class="card">
+                      <div class="card-header">
+                        <h3 class="card-title">{{ user.username }}'s Activities</h3>
+                      </div>
+                      <div class="card-body p-0">
+                        <ul class="list-group list-group-flush">
+                          {% if projects %}
+                            <li class="list-group-item">
+                              <i class="fas fa-project-diagram text-primary mr-2"></i>
+                              Involved in {{ projects|length }} project{% if projects|length != 1 %}s{% endif %}
+                            </li>
+                          {% endif %}
+                          
+                          {% if tasks %}
+                            <li class="list-group-item">
+                              <i class="fas fa-tasks text-info mr-2"></i>
+                              Has {{ tasks|length }} assigned task{% if tasks|length != 1 %}s{% endif %}
+                            </li>
+                          {% endif %}
+                        </ul>
+                      </div>
+                    </div>
+                  {% endif %}
+                </div>
+              </div>
+              <!-- /.tab-pane -->
+              <div class="tab-pane" id="projects">
+                <!-- Projects content -->
+                {% if projects %}
+                  <div class="row">
+                    {% for project in projects %}
+                      <div class="col-md-6">
+                        <div class="card">
+                          <div class="card-header">
+                            <h3 class="card-title">{{ project.name }}</h3>
+                            <div class="card-tools">
+                              <span class="badge badge-{{ project.priority_color }}">{{ project.priority }}</span>
+                            </div>
+                          </div>
+                          <div class="card-body">
+                            <p>{{ project.description|truncatechars:100 }}</p>
+                            <div class="mb-2">
+                              <strong>Team:</strong> <a href="{% url 'teams:team_detail' project.team.id %}">{{ project.team.name }}</a>
+                            </div>
+                            <div class="mb-2">
+                              <strong>Status:</strong> <span class="badge badge-{{ project.status_color }}">{{ project.status }}</span>
+                            </div>
+                            <div class="mb-2">
+                              <strong>Due Date:</strong> {{ project.due_date }}
+                            </div>
+                            <div class="progress">
+                              <div class="progress-bar bg-{{ project.status_color }}" role="progressbar" 
+                                   style="width: {{ project.progress }}%" 
+                                   aria-valuenow="{{ project.progress }}" aria-valuemin="0" aria-valuemax="100">
+                                {{ project.progress }}%
+                              </div>
+                            </div>
+                            <div class="mt-2 text-right">
+                              <a href="{% url 'projects:project_detail' project.id %}" class="btn btn-sm btn-primary">View Details</a>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    {% endfor %}
+                  </div>
+                {% else %}
+                  <p>No projects assigned.</p>
+                {% endif %}
+              </div>
+              <!-- /.tab-pane -->
+              <div class="tab-pane" id="tasks">
+                <!-- Tasks content -->
+                {% if tasks %}
+                  <div class="row">
+                    {% for task in tasks %}
+                      <div class="col-md-6">
+                        <div class="card">
+                          <div class="card-header">
+                            <h3 class="card-title">{{ task.name }}</h3>
+                            <div class="card-tools">
+                              <span class="badge badge-{{ task.priority_color }}">{{ task.priority }}</span>
+                            </div>
+                          </div>
+                          <div class="card-body">
+                            <p>{{ task.description|truncatechars:100 }}</p>
+                            <div class="mb-2">
+                              <strong>Project:</strong> <a href="{% url 'projects:project_detail' task.project.id %}">{{ task.project.name }}</a>
+                            </div>
+                            <div class="mb-2">
+                              <strong>Status:</strong> <span class="badge badge-{{ task.status_color }}">{{ task.status }}</span>
+                            </div>
+                            <div class="mb-2">
+                              <strong>Due Date:</strong> {{ task.due_date }}
+                            </div>
+                            <div class="progress">
+                              <div class="progress-bar bg-{{ task.status_color }}" role="progressbar" 
+                                   style="width: {{ task.progress }}%" 
+                                   aria-valuenow="{{ task.progress }}" aria-valuemin="0" aria-valuemax="100">
+                                {{ task.progress }}%
+                              </div>
+                            </div>
+                            <div class="mt-2 text-right">
+                              <a href="{% url 'tasks:task_detail' task.id %}" class="btn btn-sm btn-primary">View Details</a>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    {% endfor %}
+                  </div>
+                {% else %}
+                  <p>No tasks assigned.</p>
+                {% endif %}
+              </div>
+              <!-- /.tab-pane -->
+              
+              <!-- Analytics Tab -->
+              <div class="tab-pane" id="analytics">
+                <!-- Charts Row -->
+                <div class="row">
+                  <!-- Task Status Distribution Chart -->
+                  <div class="col-md-6">
+                    <div class="card">
+                      <div class="card-header">
+                        <h3 class="card-title">Task Status Distribution</h3>
+                      </div>
+                      <div class="card-body">
+                        <div class="chart-container" style="position: relative; height:250px;">
+                          <canvas id="taskStatusChart"></canvas>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Project Status Distribution Chart -->
+                  <div class="col-md-6">
+                    <div class="card">
+                      <div class="card-header">
+                        <h3 class="card-title">Project Status Distribution</h3>
+                      </div>
+                      <div class="card-body">
+                        <div class="chart-container" style="position: relative; height:250px;">
+                          <canvas id="projectStatusChart"></canvas>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Existing Analytics Content -->
+                <div class="row mt-4">
+                  <div class="col-md-6">
+                    <div class="card">
+                      <div class="card-header">
+                        <h3 class="card-title">Project Completion Analytics</h3>
+                      </div>
+                      <div class="card-body">
+                        {% if projects %}
+                          <p class="text-center">
+                            <strong>Project Completion Goals</strong>
+                          </p>
+                          {% for project in projects %}
+                            <div class="progress-group">
+                              <span class="progress-text">{{ project.name }}</span>
+                              <span class="float-right"><b>{{ project.progress|floatformat:0 }}</b>/100</span>
+                              <div class="progress progress-sm">
+                                <div class="progress-bar bg-{{ project.status_color }}" style="width: {{ project.progress }}%"></div>
+                              </div>
+                              <span class="text-muted">Due: {{ project.due_date }}</span>
+                            </div>
+                            <br>
+                          {% endfor %}
+                        {% else %}
+                          <p>No projects to analyze.</p>
+                        {% endif %}
+                      </div>
+                    </div>
+                  </div>
+                  <div class="col-md-6">
+                    <div class="card">
+                      <div class="card-header">
+                        <h3 class="card-title">Task Completion Analytics</h3>
+                      </div>
+                      <div class="card-body">
+                        {% if tasks %}
+                          <p class="text-center">
+                            <strong>Task Completion Goals</strong>
+                          </p>
+                          {% for task in tasks %}
+                            <div class="progress-group">
+                              <span class="progress-text">{{ task.name }}</span>
+                              <span class="float-right"><b>{{ task.progress|floatformat:0 }}</b>/100</span>
+                              <div class="progress progress-sm">
+                                <div class="progress-bar bg-{{ task.status_color }}" style="width: {{ task.progress }}%"></div>
+                              </div>
+                              <span class="text-muted">Project: {{ task.project.name }}</span>
+                              <br>
+                              <span class="text-muted">Due: {{ task.due_date }}</span>
+                            </div>
+                            <br>
+                          {% endfor %}
+                        {% else %}
+                          <p>No tasks to analyze.</p>
+                        {% endif %}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                
+                <!-- Status Distribution Summary -->
+                <div class="row mt-4">
+                  <div class="col-md-12">
+                    <div class="card">
+                      <div class="card-header">
+                        <h3 class="card-title">Work Summary</h3>
+                      </div>
+                      <div class="card-body">
+                        <div class="row">
+                          <div class="col-md-6">
+                            <div class="info-box bg-info">
+                              <span class="info-box-icon"><i class="fas fa-tasks"></i></span>
+                              <div class="info-box-content">
+                                <span class="info-box-text">Active Tasks</span>
+                                <span class="info-box-number">{{ tasks|length }}</span>
+                              </div>
+                            </div>
+                          </div>
+                          <div class="col-md-6">
+                            <div class="info-box bg-success">
+                              <span class="info-box-icon"><i class="fas fa-project-diagram"></i></span>
+                              <div class="info-box-content">
+                                <span class="info-box-text">Active Projects</span>
+                                <span class="info-box-number">{{ projects|length }}</span>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <!-- /.tab-pane -->
+            </div>
+            <!-- /.tab-content -->
+          </div><!-- /.card-body -->
+        </div>
+        <!-- /.card -->
+      </div>
+      <!-- /.col -->
+    </div>
+    <!-- /.row -->
+  </div><!-- /.container-fluid -->
+</section>
+
+{% block extra_js %}
+<!-- ChartJS -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // Task Status Distribution Chart
+    var taskCtx = document.getElementById('taskStatusChart').getContext('2d');
+    
+    // Count tasks by status
+    var taskStatusCounts = {
+      'BACKLOG': 0,
+      'TODO': 0,
+      'IN_PROGRESS': 0,
+      'REVIEW': 0,
+      'DONE': 0
+    };
+    
+    {% for task in tasks %}
+      taskStatusCounts['{{ task.status }}'] += 1;
+    {% endfor %}
+    
+    var taskStatusChart = new Chart(taskCtx, {
+      type: 'pie',
+      data: {
+        labels: ['Backlog', 'To Do', 'In Progress', 'Review', 'Done'],
+        datasets: [{
+          data: [
+            taskStatusCounts['BACKLOG'],
+            taskStatusCounts['TODO'],
+            taskStatusCounts['IN_PROGRESS'],
+            taskStatusCounts['REVIEW'], 
+            taskStatusCounts['DONE']
+          ],
+          backgroundColor: [
+            '#6c757d',  // secondary
+            '#17a2b8',  // info
+            '#007bff',  // primary
+            '#ffc107',  // warning
+            '#28a745'   // success
+          ],
+          borderWidth: 1
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: {
+            position: 'right',
+          },
+          title: {
+            display: true,
+            text: 'Tasks by Status'
+          }
+        }
+      }
+    });
+    
+    // Project Status Distribution Chart
+    var projectCtx = document.getElementById('projectStatusChart').getContext('2d');
+    
+    // Count projects by status
+    var projectStatusCounts = {
+      'To Do': 0,
+      'In Progress': 0,
+      'Completed': 0
+    };
+    
+    {% for project in projects %}
+      projectStatusCounts['{{ project.status }}'] += 1;
+    {% endfor %}
+    
+    var projectStatusChart = new Chart(projectCtx, {
+      type: 'pie',
+      data: {
+        labels: ['To Do', 'In Progress', 'Completed'],
+        datasets: [{
+          data: [
+            projectStatusCounts['To Do'],
+            projectStatusCounts['In Progress'],
+            projectStatusCounts['Completed']
+          ],
+          backgroundColor: [
+            '#6c757d',  // secondary
+            '#007bff',  // primary
+            '#28a745'   // success
+          ],
+          borderWidth: 1
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: {
+            position: 'right',
+          },
+          title: {
+            display: true,
+            text: 'Projects by Status'
+          }
+        }
+      }
+    });
+  });
+</script>
+{% endblock %}
+{% endblock %} 

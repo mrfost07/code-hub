@@ -4,9 +4,9 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Swifthub | Dashboard</title>
-
-{% include "components/css.html" %}
+  <title>CodeHub | {% block title %}Dashboard{% endblock %}</title>
+  
+  {% include "components/css.html" %}
 
 </head>
 <body class="hold-transition dark-mode sidebar-mini layout-fixed layout-navbar-fixed layout-footer-fixed">
@@ -22,10 +22,12 @@
   <!-- /.navbar -->
 
   <!-- Main Sidebar Container -->
- {% include "components/sidebar.html" %}
+  {% include "components/sidebar.html" %}
 
   <!-- Content Wrapper. Contains page content -->
   <div class="content-wrapper">
+    <!-- Main content -->
+    {% block content %}
     <!-- Content Header (Page header) -->
     <div class="content-header">
       <div class="container-fluid">
@@ -43,14 +45,7 @@
       </div><!-- /.container-fluid -->
     </div>
     <!-- /.content-header -->
-
-    <!-- Main content -->
-    <section class="content">
-      {% block content %}
-      
-      {% endblock %}
-    </section>
-    <!-- /.content -->
+    {% endblock %}
   </div>
   <!-- /.content-wrapper -->
 

@@ -6,6 +6,7 @@ from django.dispatch import receiver
 from django.utils.timesince import timesince
 from django.utils import timezone
 from datetime import timedelta, datetime
+from django.conf import settings
 
 
 #profile picture location
@@ -20,8 +21,8 @@ def profile_image_path_location(instance, filename):
 
 class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="profile")
-    profile_picture = models.ImageField(upload_to=profile_image_path_location, blank=True, null=True)
-    bio = models.TextField(null=True, blank=True)
+    profile_picture = models.ImageField(upload_to=profile_image_path_location, blank=True, null=True, default=settings.DEFAULT_USER_AVATAR)
+    bio = models.TextField(null=True, blank=True, max_length=500)
     location = models.CharField(max_length=255, null=True, blank=True)
     date_of_birth = models.DateField(null=True, blank=True)
     join_date = models.DateTimeField(auto_now_add=True)
@@ -33,10 +34,11 @@ class Profile(models.Model):
     @property
     def profile_picture_url(self):
         try:
-            image = self.profile_picture.url
+            if self.profile_picture and hasattr(self.profile_picture, 'url'):
+                return self.profile_picture.url
         except:
-            image = "https://cdn.pixabay.com/photo/2016/08/08/09/17/avatar-1577909__340.png"
-        return image
+            pass
+        return f"{settings.STATIC_URL}{settings.DEFAULT_USER_AVATAR}"
     
     # @property
     # def full_name(self):
@@ -73,8 +75,14 @@ class Profile(models.Model):
 
 
 @receiver(post_save, sender=User)
-def create_user_profile(sender, instance, **kwargs):
-    # if a user already exist and has no profile, create
+def create_user_profile(sender, instance, created, **kwargs):
+    # If a user is created or exists, ensure they have a profile
     Profile.objects.get_or_create(user=instance)
+
+@receiver(post_save, sender=User)
+def save_user_profile(sender, instance, **kwargs):
+    # Save the profile whenever the user is saved
+    if hasattr(instance, 'profile'):
+        instance.profile.save()
 
 

@@ -5,9 +5,11 @@ from django.contrib.auth.models import User
 from projects.models import Project
 
 STATUS_CHOICES = [
-    ('To Do', 'To Do'),
-    ('In Progress', 'In Progress'),
-    ('Completed', 'Completed'),
+    ('BACKLOG', 'Backlog'),
+    ('TODO', 'To Do'), 
+    ('IN_PROGRESS', 'In Progress'),
+    ('REVIEW', 'Review'),
+    ('DONE', 'Done'),
 ]
 
 
@@ -31,7 +33,20 @@ class TaskManager(models.Manager):
         return TaskQueryset(self.model, using=self._db)
     
     def all(self):
+        # Return all tasks by default, without filtering by active status
+        return self.get_queryset()
+    
+    def active(self):
+        # New method for active tasks only
+        return self.get_queryset().active()
+    
+    def upcoming(self):
+        # Method for upcoming tasks only
         return self.get_queryset().active().upcoming()
+    
+    # Add a method to get all tasks for a project regardless of status or due date
+    def for_project(self, project_id):
+        return self.get_queryset().filter(project_id=project_id)
 
 class Task(models.Model):
     owner = models.ForeignKey(User, on_delete=models.CASCADE, related_name='tasks')
@@ -39,7 +54,7 @@ class Task(models.Model):
     name = models.CharField(max_length=255)
     project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name='tasks')
     description = models.TextField(blank=True, null=True)
-    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="To Do")
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="BACKLOG")
     priority = models.CharField(max_length=20, choices=PRIORITY_CHOICES, default="Medium")
     start_date = models.DateField()
     due_date = models.DateField()
@@ -66,10 +81,12 @@ class Task(models.Model):
     
     @property
     def progress(self):
-        progress_dict ={
-            'To Do': 0,
-            'In Progress': 50,
-            'Completed': 100,
+        progress_dict = {
+            'BACKLOG': 0,
+            'TODO': 25,
+            'IN_PROGRESS': 50,
+            'REVIEW': 75,
+            'DONE': 100,
         }
         return progress_dict.get(self.status, 0)
     
@@ -96,7 +113,26 @@ class Task(models.Model):
         else:
             color = "danger"
         return color
+
+    def update_project_progress(self):
+        """Update associated project progress"""
+        if self.project:
+            self.project.update_progress()
     
-  
-    
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+        self.update_project_progress()
+
+class TaskComment(models.Model):
+    task = models.ForeignKey(Task, on_delete=models.CASCADE, related_name='comments')
+    author = models.ForeignKey(User, on_delete=models.CASCADE)
+    content = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+
+class TaskDependency(models.Model):
+    task = models.ForeignKey(Task, on_delete=models.CASCADE, related_name='dependencies')
+    depends_on = models.ForeignKey(Task, on_delete=models.CASCADE, related_name='dependent_tasks')
+
+
+
 

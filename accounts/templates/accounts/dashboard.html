@@ -9,7 +9,7 @@
     <div class="row">
       <div class="col-12 col-sm-6 col-md-3">
         <div class="info-box">
-          <span class="info-box-icon bg-info elevation-1"><i class="fas fa-copy"></i></span>
+          <span class="info-box-icon bg-info elevation-1"><i class="fas fa-project-diagram"></i></span>
 
           <div class="info-box-content">
             <span class="info-box-text">Projects</span>
@@ -45,8 +45,8 @@
           <span class="info-box-icon bg-success elevation-1"><i class="fas fa-users"></i></span>
 
           <div class="info-box-content">
-            <span class="info-box-text">Teams</span>
-            <span class="info-box-number">{{ team_count }}</span>
+            <span class="info-box-text">Team Members</span>
+            <span class="info-box-number">{{ latest_member_count }}</span>
           </div>
           <!-- /.info-box-content -->
         </div>
@@ -58,8 +58,8 @@
           <span class="info-box-icon bg-warning elevation-1"><i class="fas fa-user-plus"></i></span>
 
           <div class="info-box-content">
-            <span class="info-box-text">Members</span>
-            <span class="info-box-number">{{ latest_member_count }}</span>
+            <span class="info-box-text">Teams</span>
+            <span class="info-box-number">{{ team_count }}</span>
           </div>
           <!-- /.info-box-content -->
         </div>
@@ -71,10 +71,10 @@
 
     <!-- Latest Projects -->
     <div class="row">
-      <div class="col-md-12">
+      <div class="col-md-8">
         <div class="card">
           <div class="card-header">
-            <h5 class="card-title">Projects</h5>
+            <h3 class="card-title">Latest Projects</h3>
 
             <div class="card-tools">
               <button type="button" class="btn btn-tool" data-card-widget="collapse">
@@ -105,23 +105,33 @@
               <table class="table m-0">
                 <thead>
                 <tr>
-                  <th>Name</th>
-                  <th>Team</th>
-                  <th>Due In</th>
+                  <th>Project Name</th>
                   <th>Status</th>
-                  <th>Priority</th>
+                  <th>Team</th>
+                  <th>Progress</th>
                 </tr>
                 </thead>
                 <tbody>
                   {% for project in latest_projects %}
                     <tr>
-                      <td><a href="./pages/examples/project-detail.html">{{ project.name }}</a></td>
+                      <td>
+                        <a href="{% url 'projects:project_detail' project.id %}">{{ project.name }}</a>
+                        <br>
+                        <small>Due: {{ project.due_date }}</small>
+                      </td>
+                      <td><span class="badge badge-{{ project.status_color }}">{{ project.status }}</span></td>
                       <td>{{ project.team.name }}</td>
-                      <td>{{ project.days_until_due }}</td>
-                      <td>{{ project.status }}</td>
-                      <td><span class="badge badge-{{ project.priority_color }}">{{ project.priority }}</span></td>
-                     
+                      <td>
+                        <div class="progress progress-xs">
+                          <div class="progress-bar bg-{{ project.status_color }}" style="width: {{ project.progress }}%"></div>
+                        </div>
+                        <span class="badge bg-{{ project.status_color }}">{{ project.progress }}%</span>
+                      </td>
                     </tr>
+                {% empty %}
+                <tr>
+                  <td colspan="4" class="text-center">No projects found</td>
+                </tr>
                 {% endfor %}
 
 
@@ -134,7 +144,7 @@
           <!-- /.card-body -->
           <div class="card-footer clearfix">
            
-            <a href="./pages/examples/projects.html" class="btn btn-sm btn-secondary float-right">View All Projects</a>
+            <a href="{% url 'projects:project_list' %}" class="btn btn-sm btn-info float-right">View All Projects</a>
           </div>
           <!-- /.card-footer -->
         </div>
@@ -170,6 +180,91 @@
          
         </div>
         <!-- /.card -->
+      </div>
+      <!-- /.col -->
+
+      <div class="col-md-4">
+        <!-- Team Members Box -->
+        <div class="card card-widget widget-user-2">
+          <div class="card-header">
+            <h3 class="card-title">Team Members</h3>
+            <div class="card-tools">
+              <button type="button" class="btn btn-tool" data-card-widget="collapse">
+                <i class="fas fa-minus"></i>
+              </button>
+            </div>
+          </div>
+          <!-- /.card-header -->
+          <div class="card-body p-0">
+            <ul class="users-list clearfix">
+              {% for member in latest_members %}
+              <li>
+                <img src="{{ member.profile_picture_url }}" alt="User Image" style="width: 64px; height: 64px;">
+                <a class="users-list-name" href="{% url 'accounts:profile' %}">{{ member.full_name }}</a>
+                <span class="users-list-date">{{ member.date_joined }}</span>
+              </li>
+              {% empty %}
+              <li class="text-center p-3">No team members found</li>
+              {% endfor %}
+            </ul>
+            <!-- /.users-list -->
+          </div>
+          <!-- /.card-body -->
+          <div class="card-footer text-center">
+            <a href="{% url 'teams:team_list' %}">View All Users</a>
+          </div>
+          <!-- /.card-footer -->
+        </div>
+        <!-- /.card -->
+        
+        <!-- Latest Notifications -->
+        {% if request.user.is_authenticated %}
+        <div class="card">
+          <div class="card-header">
+            <h3 class="card-title">Recent Notifications</h3>
+            <div class="card-tools">
+              <span class="badge badge-danger">{{ notification_count }}</span>
+              <button type="button" class="btn btn-tool" data-card-widget="collapse">
+                <i class="fas fa-minus"></i>
+              </button>
+            </div>
+          </div>
+          <!-- /.card-header -->
+          <div class="card-body">
+            {% if latest_notifications %}
+              {% for notification in latest_notifications %}
+                <div class="callout {% if notification.read %}callout-info{% else %}callout-warning{% endif %}">
+                  <h5><strong>{{ notification.actor.username }}</strong> {{ notification.verb }}</h5>
+                  <p class="text-muted">{{ notification.created_at|date:"M d, H:i" }}</p>
+                  {% if notification.content_object %}
+                    <p>
+                      {% if 'Project' in notification.content_object|stringformat:"s" %}
+                        <a href="{% url 'projects:project_detail' notification.object_id %}" class="btn btn-sm btn-primary">
+                          View Project
+                        </a>
+                      {% elif 'Task' in notification.content_object|stringformat:"s" %}
+                        <a href="{% url 'tasks:task_detail' notification.object_id %}" class="btn btn-sm btn-info">
+                          View Task
+                        </a>
+                      {% endif %}
+                    </p>
+                  {% else %}
+                    <p><span class="badge badge-secondary">Referenced item may have been deleted</span></p>
+                  {% endif %}
+                </div>
+              {% endfor %}
+            {% else %}
+              <p class="text-center">No recent notifications</p>
+            {% endif %}
+          </div>
+          <!-- /.card-body -->
+          <div class="card-footer text-center">
+            <a href="{% url 'notifications:notification_list' %}">View All Notifications</a>
+          </div>
+          <!-- /.card-footer -->
+        </div>
+        <!-- /.card -->
+        {% endif %}
       </div>
       <!-- /.col -->
     </div>
@@ -212,23 +307,33 @@
               <table class="table m-0">
                 <thead>
                 <tr>
-                  <th>Name</th>
-                  <th>Team</th>
-                  <th>Due In</th>
+                  <th>Task</th>
+                  <th>Project</th>
                   <th>Status</th>
-                  <th>Priority</th>
+                  <th>Progress</th>
                 </tr>
                 </thead>
                 <tbody>
                   {% for task in latest_tasks %}
                     <tr>
-                      <td><a href="./pages/examples/project-detail.html">{{ task.name }}</a></td>
-                      <td>{{ task.project.team.name }}</td>
-                      <td>{{ task.days_until_due }}</td>
-                      <td>{{ task.status }}</td>
-                      <td><span class="badge badge-{{ task.priority_color }}">{{ task.priority }}</span></td>
-                     
+                      <td>
+                        <a href="{% url 'tasks:task_detail' task.id %}">{{ task.name }}</a>
+                        <br>
+                        <small>Due: {{ task.due_date }}</small>
+                      </td>
+                      <td>{{ task.project.name }}</td>
+                      <td><span class="badge badge-{{ task.status_color }}">{{ task.status }}</span></td>
+                      <td>
+                        <div class="progress progress-xs">
+                          <div class="progress-bar bg-{{ task.status_color }}" style="width: {{ task.progress }}%"></div>
+                        </div>
+                        <span class="badge bg-{{ task.status_color }}">{{ task.progress }}%</span>
+                      </td>
                     </tr>
+                {% empty %}
+                <tr>
+                  <td colspan="4" class="text-center">No tasks found</td>
+                </tr>
                 {% endfor %}
 
 
@@ -241,7 +346,7 @@
           <!-- /.card-body -->
           <div class="card-footer clearfix">
            
-            <a href="./pages/examples/projects.html" class="btn btn-sm btn-secondary float-right">View All Projects</a>
+            <a href="{% url 'tasks:task_list' %}" class="btn btn-sm btn-info float-right">View All Tasks</a>
           </div>
           <!-- /.card-footer -->
         </div>
@@ -297,7 +402,7 @@
                 <h3 class="card-title">Latest Members</h3>
 
                 <div class="card-tools">
-                  <span class="badge badge-danger">8 New Members</span>
+                  <span class="badge badge-danger">{{ latest_member_count }} New Members</span>
                   <button type="button" class="btn btn-tool" data-card-widget="collapse">
                     <i class="fas fa-minus"></i>
                   </button>
@@ -310,10 +415,10 @@
               <div class="card-body p-0">
                 <ul class="users-list clearfix">
 
-                  {% for member in  latest_members %}
+                  {% for member in latest_members %}
                         <li>
                           <img src="{{ member.profile_picture_url }}" alt="User Image">
-                          <a class="users-list-name" href="#">{{ member.full_name }}</a>
+                          <a class="users-list-name" href="{% url 'accounts:profile' %}">{{ member.full_name }}</a>
                           <span class="users-list-date">{{ member.date_joined }}</span>
                         </li>
                   {% endfor %}
@@ -325,7 +430,7 @@
               </div>
               <!-- /.card-body -->
               <div class="card-footer text-center">
-                <a href="./pages/examples/teams.html">View All Users</a>
+                <a href="{% url 'teams:team_list' %}">View All Users</a>
               </div>
               <!-- /.card-footer -->
             </div>
@@ -441,7 +546,7 @@
           </div>
           <!-- /.card-body -->
           <div class="card-footer text-center">
-            <a href="./pages/tables/tags.html" class="uppercase">View Projects and Tasks</a>
+            <a href="{% url 'projects:project_list' %}" class="uppercase">View Projects and Tasks</a>
           </div>
           <!-- /.card-footer -->
         </div>

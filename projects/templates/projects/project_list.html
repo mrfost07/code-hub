@@ -1,0 +1,125 @@
+{% extends 'base.html' %}
+
+{% block title %}Projects{% endblock %}
+
+{% block content %}
+<section class="content-header">
+  <div class="container-fluid">
+    <div class="row mb-2">
+      <div class="col-sm-6">
+        <h1>Projects</h1>
+      </div>
+      <div class="col-sm-6">
+        <ol class="breadcrumb float-sm-right">
+          <li class="breadcrumb-item"><a href="{% url 'accounts:dashboard' %}">Home</a></li>
+          <li class="breadcrumb-item active">Projects</li>
+        </ol>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="content">
+  <div class="container-fluid">
+    <div class="row">
+      <div class="col-12">
+        <div class="card">
+          <div class="card-header">
+            <h3 class="card-title">All Projects</h3>
+            <div class="card-tools">
+              <a href="{% url 'projects:project_create' %}" class="btn btn-success btn-sm">
+                <i class="fas fa-plus"></i> New Project
+              </a>
+            </div>
+          </div>
+          
+          <!-- Search and Filter Controls -->
+          <div class="card-header">
+            <form method="get" class="form-inline">
+              <div class="input-group mb-2 mr-sm-2">
+                <input type="text" name="search" class="form-control" placeholder="Search projects..." value="{{ search_query }}">
+                <div class="input-group-append">
+                  <button class="btn btn-outline-secondary" type="submit">
+                    <i class="fas fa-search"></i>
+                  </button>
+                </div>
+              </div>
+              
+              <div class="form-group mb-2 mr-sm-2">
+                <select name="status" class="form-control">
+                  <option value="">- Status -</option>
+                  {% for status_value, status_name in status_choices %}
+                  <option value="{{ status_value }}" {% if status_filter == status_value %}selected{% endif %}>{{ status_name }}</option>
+                  {% endfor %}
+                </select>
+              </div>
+              
+              <div class="form-group mb-2 mr-sm-2">
+                <select name="priority" class="form-control">
+                  <option value="">- Priority -</option>
+                  {% for priority_value, priority_name in priority_choices %}
+                  <option value="{{ priority_value }}" {% if priority_filter == priority_value %}selected{% endif %}>{{ priority_name }}</option>
+                  {% endfor %}
+                </select>
+              </div>
+              
+              <button type="submit" class="btn btn-primary mb-2">Filter</button>
+              <a href="{% url 'projects:project_list' %}" class="btn btn-secondary mb-2 ml-2">Reset</a>
+            </form>
+          </div>
+          
+          <!-- /.card-header -->
+          <div class="card-body table-responsive p-0">
+            <table class="table table-hover text-nowrap">
+              <thead>
+                <tr>
+                  <th>Name</th>
+                  <th>Team</th>
+                  <th>Status</th>
+                  <th>Priority</th>
+                  <th>Progress</th>
+                  <th>Due Date</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for project in projects %}
+                <tr>
+                  <td>
+                    <a href="{% url 'projects:project_detail' project.id %}">{{ project.name }}</a>
+                  </td>
+                  <td>{{ project.team.name }}</td>
+                  <td><span class="badge badge-{{ project.status_color }}">{{ project.status }}</span></td>
+                  <td><span class="badge badge-{{ project.priority_color }}">{{ project.priority }}</span></td>
+                  <td>
+                    <div class="progress progress-xs">
+                      <div class="progress-bar bg-{{ project.status_color }}" style="width: {{ project.progress }}%"></div>
+                    </div>
+                    <span class="badge bg-{{ project.status_color }}">{{ project.progress }}%</span>
+                  </td>
+                  <td>{{ project.due_date }}</td>
+                  <td>
+                    <a href="#" class="btn btn-info btn-sm">
+                      <i class="fas fa-pencil-alt"></i>
+                    </a>
+                    <a href="#" class="btn btn-danger btn-sm">
+                      <i class="fas fa-trash"></i>
+                    </a>
+                  </td>
+                </tr>
+                {% empty %}
+                <tr>
+                  <td colspan="7" class="text-center">No projects found</td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+          <!-- /.card-body -->
+        </div>
+        <!-- /.card -->
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

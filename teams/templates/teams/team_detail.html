@@ -1,0 +1,165 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+
+{% block title %}{{ team.name }}{% endblock %}
+
+{% block content %}
+<section class="content-header">
+  <div class="container-fluid">
+    <div class="row mb-2">
+      <div class="col-sm-6">
+        <h1>{{ team.name }}</h1>
+      </div>
+      <div class="col-sm-6">
+        <ol class="breadcrumb float-sm-right">
+          <li class="breadcrumb-item"><a href="{% url 'accounts:dashboard' %}">Home</a></li>
+          <li class="breadcrumb-item"><a href="{% url 'teams:team_list' %}">Teams</a></li>
+          <li class="breadcrumb-item active">{{ team.name }}</li>
+        </ol>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="content">
+  <div class="container-fluid">
+    <div class="row">
+      <div class="col-md-4">
+        <!-- Team Info -->
+        <div class="card card-primary">
+          <div class="card-header">
+            <h3 class="card-title">Team Information</h3>
+          </div>
+          <div class="card-body">
+            <strong><i class="fas fa-book mr-1"></i> Description</strong>
+            <p class="text-muted">{{ team.description }}</p>
+            
+            <hr>
+            
+            <strong><i class="fas fa-user-tie mr-1"></i> Team Lead</strong>
+            <p class="text-muted">{{ team.team_lead.username }}</p>
+            
+            <hr>
+            
+            <strong><i class="fas fa-calendar-alt mr-1"></i> Created</strong>
+            <p class="text-muted">{{ team.created_at }}</p>
+            
+            <hr>
+            
+            <strong><i class="fas fa-user mr-1"></i> Created By</strong>
+            <p class="text-muted">{{ team.created_by.username }}</p>
+          </div>
+          <!-- /.card-body -->
+        </div>
+        <!-- /.card -->
+      </div>
+      
+      <div class="col-md-8">
+        <!-- Team Members -->
+        <div class="card">
+          <div class="card-header">
+            <h3 class="card-title">Team Members</h3>
+            <div class="card-tools">
+              {% if request.user == team.team_lead %}
+              <button type="button" class="btn btn-success btn-sm" data-toggle="modal" data-target="#addMemberModal">
+                <i class="fas fa-user-plus"></i> Add Member
+              </button>
+              {% endif %}
+            </div>
+          </div>
+          <div class="card-body p-0">
+            <ul class="users-list clearfix">
+              {% for member in team.members.all %}
+              <li>
+                <img src="{{ member.profile.profile_picture_url }}" alt="User Image">
+                <a class="users-list-name" href="{% url 'accounts:view_profile' member.id %}">{{ member.username }}</a>
+                <span class="users-list-date">
+                  {% if member == team.team_lead %}Team Lead
+                  {% else %}
+                    {% if request.user == team.team_lead %}
+                    <a href="{% url 'teams:remove_member' team.id member.id %}" 
+                       class="text-danger" 
+                       onclick="return confirm('Are you sure you want to remove this member?')">
+                      <i class="fas fa-user-minus"></i>
+                    </a>
+                    {% endif %}
+                  {% endif %}
+                </span>
+              </li>
+              {% empty %}
+              <li class="text-center p-3">No members found in this team.</li>
+              {% endfor %}
+            </ul>
+          </div>
+        </div>
+        <!-- /.card -->
+        
+        <!-- Team Projects -->
+        <div class="card">
+          <div class="card-header">
+            <h3 class="card-title">Team Projects</h3>
+          </div>
+          <div class="card-body p-0">
+            <table class="table table-striped">
+              <thead>
+                <tr>
+                  <th>Project</th>
+                  <th>Status</th>
+                  <th>Progress</th>
+                  <th>Due Date</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for project in team.projects.all %}
+                <tr>
+                  <td>
+                    <a href="{% url 'projects:project_detail' project.id %}">{{ project.name }}</a>
+                  </td>
+                  <td><span class="badge badge-{{ project.status_color }}">{{ project.status }}</span></td>
+                  <td>
+                    <div class="progress progress-xs">
+                      <div class="progress-bar bg-{{ project.status_color }}" style="width: {{ project.progress }}%"></div>
+                    </div>
+                    <span class="badge bg-{{ project.status_color }}">{{ project.progress }}%</span>
+                  </td>
+                  <td>{{ project.due_date }}</td>
+                </tr>
+                {% empty %}
+                <tr>
+                  <td colspan="4" class="text-center">No projects found for this team.</td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <!-- /.card -->
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Add Member Modal -->
+<div class="modal fade" id="addMemberModal" tabindex="-1" role="dialog" aria-labelledby="addMemberModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="addMemberModalLabel">Add Team Member</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <form method="post" action="{% url 'teams:add_member' team.id %}">
+        <div class="modal-body">
+          {% csrf_token %}
+          {{ member_form|crispy }}
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+          <button type="submit" class="btn btn-primary">Add Member</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

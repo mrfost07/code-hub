@@ -1,75 +1,194 @@
+{% load static %}
 <nav class="main-header navbar navbar-expand navbar-dark">
-    <!-- Left navbar links -->
-    <ul class="navbar-nav">
-      <li class="nav-item">
-        <a class="nav-link" data-widget="pushmenu" href="#" role="button"><i class="fas fa-bars"></i></a>
-      </li>
-      <li class="nav-item d-none d-sm-inline-block">
-        <a href="dashboard.html" class="nav-link">Home</a>
-      </li>
-      <li class="nav-item d-none d-sm-inline-block">
-        <a href="#" class="nav-link">Teams</a>
-      </li>
-    </ul>
+  <!-- Left navbar links -->
+  <ul class="navbar-nav">
+    <li class="nav-item">
+      <a class="nav-link" data-widget="pushmenu" href="#" role="button"><i class="fas fa-bars"></i></a>
+    </li>
+    <li class="nav-item d-none d-sm-inline-block">
+      <a href="{% url 'accounts:dashboard' %}" class="nav-link">Home</a>
+    </li>
+    <li class="nav-item d-none d-sm-inline-block">
+      <a href="{% url 'teams:team_list' %}" class="nav-link">Teams</a>
+    </li>
+    <li class="nav-item d-none d-sm-inline-block">
+      <a href="{% url 'projects:project_list' %}" class="nav-link">Projects</a>
+    </li>
+    <li class="nav-item d-none d-sm-inline-block">
+      <a href="{% url 'tasks:task_list' %}" class="nav-link">Tasks</a>
+    </li>
+  </ul>
 
-    <!-- Right navbar links -->
-    <ul class="navbar-nav ml-auto">
-
-      
-      <!-- Navbar Search -->
-      <li class="nav-item">
-        <a class="nav-link" data-widget="navbar-search" href="#" role="button">
-          <i class="fas fa-search"></i>
+  <!-- Right navbar links -->
+  <ul class="navbar-nav ml-auto">
+    <!-- Authentication Links -->
+    {% if user.is_authenticated %}
+    <li class="nav-item dropdown">
+      <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+        <i class="fas fa-user"></i> {{ user.username }}
+      </a>
+      <div class="dropdown-menu dropdown-menu-right" aria-labelledby="userDropdown">
+        <a class="dropdown-item" href="{% url 'accounts:profile' %}">
+          <i class="fas fa-user-circle mr-2"></i> Profile
         </a>
-        <div class="navbar-search-block">
-          <form class="form-inline">
-            <div class="input-group input-group-sm">
-              <input class="form-control form-control-navbar" type="search" placeholder="Search" aria-label="Search">
-              <div class="input-group-append">
-                <button class="btn btn-navbar" type="submit">
-                  <i class="fas fa-search"></i>
-                </button>
-                <button class="btn btn-navbar" type="button" data-widget="navbar-search">
-                  <i class="fas fa-times"></i>
-                </button>
-              </div>
+        <div class="dropdown-divider"></div>
+        <form action="{% url 'accounts:logout' %}" method="post" class="dropdown-item p-0">
+          {% csrf_token %}
+          <button type="submit" class="btn btn-link text-danger w-100 text-left">
+            <i class="fas fa-sign-out-alt mr-2"></i> Logout
+          </button>
+        </form>
+      </div>
+    </li>
+    {% else %}
+    <li class="nav-item">
+      <a href="{% url 'accounts:login' %}" class="nav-link">
+        <i class="fas fa-sign-in-alt"></i> Login
+      </a>
+    </li>
+    <li class="nav-item">
+      <a href="{% url 'accounts:register' %}" class="nav-link">
+        <i class="fas fa-user-plus"></i> Register
+      </a>
+    </li>
+    {% endif %}
+    
+    <!-- Navbar Search -->
+    <li class="nav-item">
+      <a class="nav-link" data-widget="navbar-search" href="#" role="button">
+        <i class="fas fa-search"></i>
+      </a>
+      <div class="navbar-search-block">
+        <form class="form-inline" action="{% url 'search' %}" method="GET">
+          <div class="input-group input-group-sm">
+            <input class="form-control form-control-navbar" type="search" name="q" placeholder="Search projects, tasks, teams..." aria-label="Search">
+            <div class="input-group-append">
+              <button class="btn btn-navbar" type="submit">
+                <i class="fas fa-search"></i>
+              </button>
+              <button class="btn btn-navbar" type="button" data-widget="navbar-search">
+                <i class="fas fa-times"></i>
+              </button>
             </div>
-          </form>
-        </div>
-      </li>
+          </div>
+        </form>
+      </div>
+    </li>
 
-      <!-- Notifications Dropdown Menu -->
-      <li class="nav-item dropdown">
-        <a class="nav-link" data-toggle="dropdown" href="#">
-          <i class="far fa-bell"></i>
-          <span class="badge badge-warning navbar-badge">15</span>
-        </a>
-        <div class="dropdown-menu dropdown-menu-lg dropdown-menu-right">
-          <span class="dropdown-item dropdown-header">15 Notifications</span>
-          <div class="dropdown-divider"></div>
-          <a href="#" class="dropdown-item">
-            <i class="fas fa-envelope mr-2"></i> 4 new messages
-            <span class="float-right text-muted text-sm">3 mins</span>
-          </a>
-          <div class="dropdown-divider"></div>
-          <a href="#" class="dropdown-item">
-            <i class="fas fa-users mr-2"></i> 8 friend requests
-            <span class="float-right text-muted text-sm">12 hours</span>
-          </a>
-          <div class="dropdown-divider"></div>
-          <a href="#" class="dropdown-item">
-            <i class="fas fa-file mr-2"></i> 3 new reports
-            <span class="float-right text-muted text-sm">2 days</span>
-          </a>
-          <div class="dropdown-divider"></div>
-          <a href="#" class="dropdown-item dropdown-footer">See All Notifications</a>
+    <!-- Notifications Dropdown Menu -->
+    {% if user.is_authenticated %}
+    <li class="nav-item dropdown">
+      <a class="nav-link" data-toggle="dropdown" href="#">
+        <i class="far fa-bell"></i>
+        {% if notification_count %}
+        <span class="badge badge-warning navbar-badge">{{ notification_count }}</span>
+        {% endif %}
+      </a>
+      <div class="dropdown-menu dropdown-menu-lg dropdown-menu-right notification-dropdown">
+        {% if latest_notifications %}
+        <span class="dropdown-item dropdown-header">{{ notification_count }} Notifications</span>
+        <div class="dropdown-divider"></div>
+        
+        <div class="notification-scroll" style="max-height: 300px; overflow-y: auto;">
+          {% for notification in latest_notifications %}
+            {% if notification.content_object %}
+              <a href="{% if 'Project' in notification.content_object|stringformat:'s' %}{% url 'projects:project_detail' notification.object_id %}{% elif 'Task' in notification.content_object|stringformat:'s' %}{% url 'tasks:task_detail' notification.object_id %}{% else %}#{% endif %}" class="dropdown-item notification-item">
+            {% else %}
+              <a href="#" class="dropdown-item notification-item">
+            {% endif %}
+              {% if 'created' in notification.verb %}
+                <i class="fas fa-plus-circle mr-2 text-success"></i>
+              {% elif 'updated' in notification.verb or 'changed' in notification.verb %}
+                <i class="fas fa-edit mr-2 text-primary"></i>
+              {% elif 'added' in notification.verb %}
+                <i class="fas fa-user-plus mr-2 text-info"></i>
+              {% elif 'progress' in notification.verb or 'moved' in notification.verb %}
+                <i class="fas fa-tasks mr-2 text-warning"></i>
+              {% else %}
+                <i class="fas fa-bell mr-2 text-secondary"></i>
+              {% endif %}
+              <div>
+                <p class="mb-0"><strong>{{ notification.actor.username }}</strong> {{ notification.verb }}</p>
+                <span class="text-muted text-sm">{{ notification.notification_time_formatted }}</span>
+                {% if not notification.content_object %}
+                  <span class="badge badge-secondary">Item deleted</span>
+                {% endif %}
+              </div>
+            </a>
+            <div class="dropdown-divider"></div>
+          {% endfor %}
         </div>
-      </li>
-      <li class="nav-item">
-        <a class="nav-link" data-widget="fullscreen" href="#" role="button">
-          <i class="fas fa-expand-arrows-alt"></i>
-        </a>
-      </li>
-      
-    </ul>
-  </nav>
+        
+        <div class="dropdown-footer d-flex justify-content-between">
+          <a href="{% url 'notifications:notification_list' %}" class="btn btn-sm btn-primary">
+            <i class="fas fa-eye mr-1"></i> See All
+          </a>
+          <a href="{% url 'notifications:mark_all_as_read' %}" class="btn btn-sm btn-success">
+            <i class="fas fa-check-double mr-1"></i> Mark All Read
+          </a>
+        </div>
+        {% else %}
+        <span class="dropdown-item dropdown-header">No notifications</span>
+        {% endif %}
+      </div>
+    </li>
+    {% endif %}
+    
+    <li class="nav-item">
+      <a class="nav-link" data-widget="fullscreen" href="#" role="button">
+        <i class="fas fa-expand-arrows-alt"></i>
+      </a>
+    </li>
+    
+  </ul>
+</nav>
+
+<style>
+  /* Responsive notification dropdown styles */
+  .notification-dropdown {
+    width: 320px;
+    max-width: 100vw;
+    padding: 0;
+  }
+  
+  .notification-dropdown .dropdown-header {
+    font-weight: bold;
+    background-color: #f8f9fa;
+    border-bottom: 1px solid #ddd;
+  }
+  
+  .notification-item {
+    display: flex;
+    align-items: flex-start;
+    padding: 10px 15px;
+    white-space: normal;
+  }
+  
+  .notification-item:hover {
+    background-color: #f8f9fa;
+  }
+  
+  .notification-item div {
+    flex: 1;
+  }
+  
+  .notification-item p {
+    line-height: 1.2;
+  }
+  
+  .dropdown-footer {
+    padding: 8px 12px;
+    background-color: #f8f9fa;
+    border-top: 1px solid #ddd;
+  }
+  
+  @media (max-width: 576px) {
+    .notification-dropdown {
+      width: 290px;
+    }
+    
+    .notification-item {
+      padding: 8px 12px;
+    }
+  }
+</style>

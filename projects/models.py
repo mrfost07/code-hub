@@ -45,6 +45,7 @@ class Project(models.Model):
     active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    progress = models.FloatField(default=0)  # Add this field
 
     objects = ProjectManager()
 
@@ -64,28 +65,16 @@ class Project(models.Model):
         return None
     
     @property
-    def progress(self):
-        progress_dict ={
-            'To Do': 0,
-            'In Progress': 50,
-            'Completed': 100,
-        }
-        return progress_dict.get(self.status, 0)
-    
-
-    @property
     def status_color(self):
-        status_value = self.progress
-        if status_value == 100:
+        if self.progress >= 75:
             color = "success"
-        elif status_value == 50:
-            color = "primary"
+        elif self.progress >= 50:
+            color = "primary" 
+        elif self.progress >= 25:
+            color = "warning"
         else:
-            color = ""
+            color = "secondary"
         return color
-
-           
-    
 
     def priority_color(self):
         if self.priority == "Low":
@@ -95,7 +84,38 @@ class Project(models.Model):
         else:
             color = "danger"
         return color
+
+    def update_progress(self):
+        """Calculate project progress based on tasks"""
+        tasks = self.tasks.all()
+        if not tasks:
+            self.progress = 0
+        else:
+            total_progress = sum(task.progress for task in tasks)
+            self.progress = total_progress / tasks.count()
+        
+        # Update project status based on progress
+        if self.progress >= 90:
+            self.status = "Completed"
+        elif self.progress >= 25:
+            self.status = "In Progress"
+        else:
+            self.status = "To Do"
+            
+        self.save(update_fields=['progress', 'status'])
+
+class ProjectAttachment(models.Model):
+    project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name='attachments')
+    file = models.FileField(upload_to='project_attachments/')
+    uploaded_by = models.ForeignKey(User, on_delete=models.CASCADE)
+    uploaded_at = models.DateTimeField(auto_now_add=True)
     
-  
-    
+class ProjectComment(models.Model):
+    project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name='comments')
+    author = models.ForeignKey(User, on_delete=models.CASCADE)
+    content = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+
+
+
 

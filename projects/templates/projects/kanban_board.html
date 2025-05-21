@@ -1,0 +1,180 @@
+{% extends 'base.html' %}
+{% load static project_tags %}
+
+{% block title %}{{ project.name }} - Kanban Board{% endblock %}
+
+{% block content %}
+<section class="content">
+  <div class="container-fluid">
+    <!-- Progress Overview -->
+    <div class="col-12 mb-4">
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">Project Progress</h3>
+          <div class="card-tools">
+            <span id="projectStatus" class="badge badge-{{ project.status_color }}">{{ project.status }}</span>
+            <span class="badge badge-info ml-2">Total Tasks: {{ total_task_count }}</span>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="progress">
+            <div id="projectProgress" class="progress-bar bg-success" role="progressbar" 
+                 style="width: {{ project.progress }}%" 
+                 aria-valuenow="{{ project.progress }}" aria-valuemin="0" aria-valuemax="100">
+              {{ project.progress }}%
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Kanban Columns -->
+    <div class="row">
+      {% for column in columns %}
+      <div class="col">
+        <div class="card">
+          <div class="card-header bg-{{ column.color }}">
+            <h3 class="card-title">{{ column.title }}</h3>
+            <span class="badge badge-light float-right">{{ column.tasks|length }}</span>
+          </div>
+          <div class="card-body">
+            <div class="kanban-column" data-status="{{ column.status }}">
+              {% for task in column.tasks %}
+              <div class="card mb-2 task-card" data-task-id="{{ task.id }}">
+                <div class="card-body p-2">
+                  <h5 class="card-title">{{ task.name }}</h5>
+                  <p class="card-text small">{{ task.description|truncatechars:50 }}</p>
+                  <div class="progress progress-xs">
+                    <div class="progress-bar bg-{{ task.status|get_status_color }}" 
+                         style="width: {{ task.progress }}%"></div>
+                  </div>
+                  <div class="mt-2">
+                    <small class="text-muted">{{ task.owner.username }}</small>
+                    <span class="badge badge-{{ task.priority|lower }} float-right">
+                      {{ task.priority }}
+                    </span>
+                  </div>
+                </div>
+              </div>
+              {% empty %}
+              <div class="text-center text-muted p-3">
+                <em>No tasks in this column</em>
+              </div>
+              {% endfor %}
+            </div>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.14.0/Sortable.min.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const columns = document.querySelectorAll('.kanban-column');
+    const csrfToken = '{{ csrf_token }}';
+
+    columns.forEach(column => {
+        new Sortable(column, {
+            group: 'tasks',
+            animation: 150,
+            dragClass: 'task-drag',
+            ghostClass: 'task-ghost',
+            onEnd: function(evt) {
+                const taskId = evt.item.dataset.taskId;
+                const newStatus = evt.to.dataset.status;
+                
+                fetch(`/tasks/${taskId}/update-status/`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': csrfToken
+                    },
+                    body: JSON.stringify({
+                        status: newStatus
+                    })
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        return response.json().then(data => {
+                            throw new Error(data.error || `HTTP error! status: ${response.status}`);
+                        });
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.success) {
+                        updateProgress(data.task_progress, data.project_progress, data.project_status);
+                    } else {
+                        evt.from.appendChild(evt.item);
+                        alert(data.error || 'Failed to update task status');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    evt.from.appendChild(evt.item);
+                    alert('Failed to update task status: ' + error.message);
+                });
+            }
+        });
+    });
+
+    function updateProgress(taskProgress, projectProgress, projectStatus) {
+        // Update progress bar
+        const projectProgressBar = document.getElementById('projectProgress');
+        if (projectProgressBar) {
+            projectProgressBar.style.width = `${projectProgress}%`;
+            projectProgressBar.textContent = `${projectProgress}%`;
+        }
+        
+        // Update project status badge
+        const projectStatusBadge = document.getElementById('projectStatus');
+        if (projectStatusBadge && projectStatus) {
+            projectStatusBadge.textContent = projectStatus;
+            
+            // Update the badge color based on status
+            projectStatusBadge.className = 'badge';
+            if (projectProgress >= 75) {
+                projectStatusBadge.classList.add('badge-success');
+            } else if (projectProgress >= 50) {
+                projectStatusBadge.classList.add('badge-primary');
+            } else if (projectProgress >= 25) {
+                projectStatusBadge.classList.add('badge-warning');
+            } else {
+                projectStatusBadge.classList.add('badge-secondary');
+            }
+        }
+    }
+});
+</script>
+
+<style>
+.task-card {
+    cursor: grab;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
+    transition: all 0.3s cubic-bezier(.25,.8,.25,1);
+}
+.task-card:hover {
+    box-shadow: 0 3px 6px rgba(0,0,0,0.16), 0 3px 6px rgba(0,0,0,0.23);
+}
+.task-ghost {
+    opacity: 0.5;
+}
+.task-drag {
+    cursor: grabbing;
+}
+.kanban-column {
+    min-height: 200px;
+    padding: 0.5rem;
+}
+.card-header.bg-secondary { background-color: #6c757d !important; color: white; }
+.card-header.bg-info { background-color: #17a2b8 !important; color: white; }
+.card-header.bg-primary { background-color: #007bff !important; color: white; }
+.card-header.bg-warning { background-color: #ffc107 !important; color: black; }
+.card-header.bg-success { background-color: #28a745 !important; color: white; }
+</style>
+{% endblock %}
+{% endblock %}

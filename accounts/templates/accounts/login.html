@@ -1,0 +1,105 @@
+{% extends 'base.html' %}
+
+{% block title %}Login{% endblock %}
+
+{% block content %}
+<div class="login-box">
+  <div class="login-logo">
+    <a href="#"><b>Code</b>Hub</a>
+  </div>
+  <!-- /.login-logo -->
+  <div class="card card-outline card-primary">
+    <div class="card-header text-center">
+      <h1 class="h4">Welcome Back</h1>
+    </div>
+    <div class="card-body login-card-body">
+      <p class="login-box-msg">Sign in to start your session</p>
+
+      {% if messages %}
+        {% for message in messages %}
+          <div class="alert alert-{{ message.tags }} alert-dismissible fade show">
+            {{ message }}
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+        {% endfor %}
+      {% endif %}
+
+      <form method="post">
+        {% csrf_token %}
+        <div class="input-group mb-3">
+          <input type="text" name="username" class="form-control" placeholder="Username" required autofocus>
+          <div class="input-group-append">
+            <div class="input-group-text">
+              <span class="fas fa-user"></span>
+            </div>
+          </div>
+        </div>
+        <div class="input-group mb-3">
+          <input type="password" name="password" class="form-control" placeholder="Password" required>
+          <div class="input-group-append">
+            <div class="input-group-text">
+              <span class="fas fa-lock"></span>
+            </div>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-8">
+            <div class="icheck-primary">
+              <input type="checkbox" id="remember">
+              <label for="remember">
+                Remember Me
+              </label>
+            </div>
+          </div>
+          <!-- /.col -->
+          <div class="col-4">
+            <button type="submit" class="btn btn-primary btn-block btn-flat">
+              <i class="fas fa-sign-in-alt mr-2"></i>Sign In
+            </button>
+          </div>
+          <!-- /.col -->
+        </div>
+      </form>
+
+      <div class="social-auth-links text-center mb-3">
+        <p class="mt-3">- OR -</p>
+      </div>
+      <!-- /.social-auth-links -->
+
+      <p class="mb-1 text-center">
+        <a href="#">Forgot your password?</a>
+      </p>
+      <p class="mb-0 text-center">
+        <a href="{% url 'accounts:register' %}" class="text-center btn btn-block btn-outline-secondary">
+          <i class="fas fa-user-plus mr-2"></i>Register a new membership
+        </a>
+      </p>
+    </div>
+    <!-- /.login-card-body -->
+  </div>
+</div>
+<!-- /.login-box -->
+
+<!-- Add some extra styling -->
+<style>
+  .login-box {
+    box-shadow: 0 14px 28px rgba(0,0,0,0.25), 0 10px 10px rgba(0,0,0,0.22);
+    margin-top: 10vh;
+  }
+  .login-logo {
+    margin-bottom: 20px;
+  }
+  .login-logo a {
+    color: #333;
+    text-shadow: 1px 1px 1px rgba(0,0,0,0.1);
+  }
+  .btn-flat {
+    border-radius: 4px;
+  }
+  .card-outline {
+    border-top: 3px solid #007bff;
+  }
+</style>
+{% endblock %} 
