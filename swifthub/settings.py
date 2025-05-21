@@ -179,3 +179,5 @@ CSRF_FAILURE_VIEW = 'django.views.csrf.csrf_failure'
 SESSION_COOKIE_SECURE = False  # Set to True in production with HTTPS
 # SESSION_COOKIE_SAMESITE = 'Lax'  # Uncomment in production
 SESSION_COOKIE_AGE = 1209600  # 2 weeks in seconds
+
+# PORT is handled by Gunicorn in the Procfile

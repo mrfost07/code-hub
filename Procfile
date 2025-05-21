@@ -1,1 +1,1 @@
-web: gunicorn swifthub.wsgi --log-file - 
+web: gunicorn swifthub.wsgi --log-file - --bind 0.0.0.0:$PORT 
