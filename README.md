@@ -139,3 +139,12 @@ codehub/
 ├── templates/      # HTML templates
 └── media/          # User-uploaded files
 ```
+
+## Deployment on Railway
+
+1. Push your code to GitHub
+2. Connect your repository to Railway
+3. Add the following commands to your Railway dashboard:
+   - In the "Settings" tab, add a "Start Command": `python manage.py migrate && python manage.py collectstatic --noinput && gunicorn swifthub.wsgi --log-file -`
+   
+This ensures that database migrations are run before the web server starts, creating all necessary database tables.
