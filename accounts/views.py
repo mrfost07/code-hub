@@ -14,6 +14,7 @@ from django.contrib.auth import get_user_model
 from django.utils.encoding import force_str
 from django.utils.http import urlsafe_base64_decode
 from django.contrib.auth.tokens import default_token_generator
+from django.utils.timezone import timezone
 
 
 # class DashboardView(View):
@@ -198,25 +199,29 @@ def profile(request, user_id=None):
 
 @login_required
 def edit_profile(request):
-    # Ensure that only the logged-in user can edit their own profile
-    # This is an additional security measure beyond template checks
-    
     if request.method == 'POST':
         form = UserProfileForm(request.POST, request.FILES, instance=request.user.profile)
         if form.is_valid():
-            form.save()
+            profile = form.save(commit=False)
             
-            # Create a notification for profile update
-            create_profile_notification(
-                user=request.user,
-                actor=request.user,
-                verb="updated your profile successfully"
-            )
+            # Handle profile picture upload
+            if 'profile_picture' in request.FILES:
+                file = request.FILES['profile_picture']
+                # Create a safe filename
+                ext = file.name.split('.')[-1]
+                filename = f"{request.user.username}_{timezone.now().strftime('%Y%m%d_%H%M%S')}.{ext}"
+                profile.profile_picture.save(filename, file, save=False)
             
+            profile.save()
+            messages.success(request, 'Your profile has been updated successfully.')
             return redirect('accounts:profile')
     else:
         form = UserProfileForm(instance=request.user.profile)
-    return render(request, 'accounts/edit_profile.html', {'form': form})
+    
+    return render(request, 'accounts/edit_profile.html', {
+        'form': form,
+        'page_title': 'Edit Profile',
+    })
 
 def email_verification(request, uidb64, token):
     try:

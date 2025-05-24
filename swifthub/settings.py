@@ -134,25 +134,34 @@ USE_TZ = True
 
 
 # Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/5.1/howto/static-files/
-
 STATIC_URL = '/static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 STATICFILES_DIRS = [
     BASE_DIR / 'static',
 ]
+
+# Simplified static file serving
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedStaticFilesStorage'
 WHITENOISE_MAX_AGE = 31536000  # Cache static files for 1 year
-
-
 
 # Media files
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
-# Default user profile image
+# Default user profile image - relative to MEDIA_ROOT
 DEFAULT_USER_AVATAR = 'dist/img/default-avatar.jpg'
 
+# File Upload Settings
+FILE_UPLOAD_MAX_MEMORY_SIZE = 5242880  # 5MB
+FILE_UPLOAD_PERMISSIONS = 0o644
+FILE_UPLOAD_DIRECTORY_PERMISSIONS = 0o755
+
+# WhiteNoise Configuration
+WHITENOISE_ROOT = None
+WHITENOISE_AUTOREFRESH = DEBUG
+WHITENOISE_USE_FINDERS = DEBUG
+WHITENOISE_MANIFEST_STRICT = False
+WHITENOISE_ALLOW_ALL_ORIGINS = True
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
@@ -220,7 +229,6 @@ if not DEBUG:
 
 # Memory optimization settings
 DATA_UPLOAD_MAX_MEMORY_SIZE = 1048576  # 1 MB
-FILE_UPLOAD_MAX_MEMORY_SIZE = 1048576  # 1 MB
 TEMPLATE_LOADERS = (
     ('django.template.loaders.cached.Loader', [
         'django.template.loaders.filesystem.Loader',

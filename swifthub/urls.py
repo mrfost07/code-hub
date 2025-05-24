@@ -18,24 +18,29 @@ from django.contrib import admin
 from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
-from django.views.generic import RedirectView
-from . import views
+from django.views.static import serve
+from .views import dashboard, search
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', include('accounts.urls')),
+    path('', dashboard, name='dashboard'),
+    path('search/', search, name='search'),
+    path('accounts/', include('accounts.urls')),
     path('projects/', include('projects.urls')),
     path('tasks/', include('tasks.urls')),
     path('teams/', include('teams.urls')),
     path('notifications/', include('notifications.urls')),
-    # Global search
-    path('search/', views.search, name='search'),
     # Redirect old team URLs
     path('pages/examples/teams.html', RedirectView.as_view(url='/teams/', permanent=True)),
     # Add favicon
     path('favicon.ico', RedirectView.as_view(url='/static/dist/img/favicon.ico')),
+    # Serve media files in production
+    path('media/<path:path>/', serve, {
+        'document_root': settings.MEDIA_ROOT,
+    }, name='media'),
 ]
 
+# Serve static and media files in development
 if settings.DEBUG:
     urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
