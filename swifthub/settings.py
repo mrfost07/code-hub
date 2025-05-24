@@ -28,10 +28,10 @@ SECRET_KEY = os.environ.get('SECRET_KEY', 'your-default-secret-key-for-dev')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.environ.get('DEBUG', 'False') == 'True'
 
-ALLOWED_HOSTS = ['https://code-hub-production.up.railway.app/']
+ALLOWED_HOSTS = ['code-hub-production.up.railway.app', '*']
 CSRF_TRUSTED_ORIGINS = [
-    'https://code-hub-production.up.railway.app/',
-    'https://code-hub-production.up.railway.app/',  # Add your custom domain if you have one
+    'https://code-hub-production.up.railway.app',
+    'http://code-hub-production.up.railway.app',
 ]
 
 # Application definition
@@ -141,7 +141,7 @@ STATIC_ROOT = BASE_DIR / 'staticfiles'
 STATICFILES_DIRS = [
     BASE_DIR / 'static',
 ]
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedStaticFilesStorage'  # Less memory intensive
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedStaticFilesStorage'
 WHITENOISE_MAX_AGE = 31536000  # Cache static files for 1 year
 
 
@@ -201,14 +201,22 @@ MESSAGE_TAGS = {
 
 # Security settings for production
 if not DEBUG:
-    SECURE_SSL_REDIRECT = True
+    # HTTPS settings
+    SECURE_SSL_REDIRECT = False  # Railway handles SSL
+    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+    
+    # Cookie settings
     SESSION_COOKIE_SECURE = True
     CSRF_COOKIE_SECURE = True
-    SECURE_BROWSER_XSS_FILTER = True
-    SECURE_CONTENT_TYPE_NOSNIFF = True
+    
+    # HSTS settings
     SECURE_HSTS_SECONDS = 31536000  # 1 year
     SECURE_HSTS_INCLUDE_SUBDOMAINS = True
     SECURE_HSTS_PRELOAD = True
+    
+    # Content security
+    SECURE_BROWSER_XSS_FILTER = True
+    SECURE_CONTENT_TYPE_NOSNIFF = True
 
 # Memory optimization settings
 DATA_UPLOAD_MAX_MEMORY_SIZE = 1048576  # 1 MB
@@ -233,19 +241,25 @@ CACHES = {
     }
 }
 
-# Logging settings to reduce memory usage
+# Logging configuration
 LOGGING = {
     'version': 1,
-    'disable_existing_loggers': True,
+    'disable_existing_loggers': False,
     'handlers': {
         'console': {
             'class': 'logging.StreamHandler',
-            'level': 'WARNING',
         },
     },
     'root': {
         'handlers': ['console'],
         'level': 'WARNING',
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['console'],
+            'level': os.getenv('DJANGO_LOG_LEVEL', 'WARNING'),
+            'propagate': False,
+        },
     },
 }
 
