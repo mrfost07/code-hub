@@ -14,7 +14,6 @@ from django.contrib.auth import get_user_model
 from django.utils.encoding import force_str
 from django.utils.http import urlsafe_base64_decode
 from django.contrib.auth.tokens import default_token_generator
-from django.utils.timezone import timezone
 
 
 # class DashboardView(View):
@@ -199,52 +198,25 @@ def profile(request, user_id=None):
 
 @login_required
 def edit_profile(request):
-    try:
-        if request.method == 'POST':
-            form = UserProfileForm(request.POST, request.FILES, instance=request.user.profile)
-            if form.is_valid():
-                profile = form.save(commit=False)
-                
-                # Handle profile picture upload
-                if 'profile_picture' in request.FILES:
-                    file = request.FILES['profile_picture']
-                    # Validate file type
-                    if not file.content_type.startswith('image/'):
-                        messages.error(request, 'Please upload a valid image file.')
-                        return render(request, 'accounts/edit_profile.html', {'form': form})
-                    
-                    # Create a safe filename
-                    ext = file.name.split('.')[-1].lower()
-                    if ext not in ['jpg', 'jpeg', 'png', 'gif']:
-                        messages.error(request, 'Please upload a valid image file (jpg, jpeg, png, or gif).')
-                        return render(request, 'accounts/edit_profile.html', {'form': form})
-                    
-                    filename = f"{request.user.username}_{timezone.now().strftime('%Y%m%d_%H%M%S')}.{ext}"
-                    try:
-                        profile.profile_picture.save(filename, file, save=False)
-                    except Exception as e:
-                        messages.error(request, f'Error uploading file: {str(e)}')
-                        return render(request, 'accounts/edit_profile.html', {'form': form})
-                
-                try:
-                    profile.save()
-                    messages.success(request, 'Your profile has been updated successfully.')
-                    return redirect('accounts:profile')
-                except Exception as e:
-                    messages.error(request, f'Error saving profile: {str(e)}')
-                    return render(request, 'accounts/edit_profile.html', {'form': form})
-            else:
-                messages.error(request, 'Please correct the errors below.')
-        else:
-            form = UserProfileForm(instance=request.user.profile)
-        
-        return render(request, 'accounts/edit_profile.html', {
-            'form': form,
-            'page_title': 'Edit Profile',
-        })
-    except Exception as e:
-        messages.error(request, f'An unexpected error occurred: {str(e)}')
-        return redirect('accounts:profile')
+    # Ensure that only the logged-in user can edit their own profile
+    # This is an additional security measure beyond template checks
+    
+    if request.method == 'POST':
+        form = UserProfileForm(request.POST, request.FILES, instance=request.user.profile)
+        if form.is_valid():
+            form.save()
+            
+            # Create a notification for profile update
+            create_profile_notification(
+                user=request.user,
+                actor=request.user,
+                verb="updated your profile successfully"
+            )
+            
+            return redirect('accounts:profile')
+    else:
+        form = UserProfileForm(instance=request.user.profile)
+    return render(request, 'accounts/edit_profile.html', {'form': form})
 
 def email_verification(request, uidb64, token):
     try:

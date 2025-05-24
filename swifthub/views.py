@@ -38,7 +38,7 @@ def search(request):
         # (owned by user or in a project the user has access to)
         tasks = Task.objects.filter(
             (Q(owner=user) | Q(project__owner=user) | Q(project__team__in=user_teams)) &
-            (Q(title__icontains=query) | 
+            (Q(name__icontains=query) | 
              Q(description__icontains=query) |
              Q(status__icontains=query))
         ).distinct().select_related('owner', 'project')
