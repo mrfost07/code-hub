@@ -4,6 +4,7 @@ from django.contrib import messages
 from django.contrib.auth import get_user_model
 from .models import Team
 from .forms import TeamForm, TeamMemberForm
+from notifications.utils import create_notification
 
 # Create your views here.
 
@@ -44,28 +45,42 @@ def team_create(request):
 
 @login_required
 def add_member(request, team_id):
-    try:
-        team = get_object_or_404(Team, id=team_id)
-        if request.method == 'POST':
-            form = TeamMemberForm(request.POST)
-            if form.is_valid():
-                user = form.cleaned_data['user']
-                if user not in team.members.all():
-                    team.members.add(user)
-                    messages.success(request, f'{user.username} has been added to the team.')
-                else:
-                    messages.warning(request, f'{user.username} is already a team member.')
-                return redirect('teams:team_detail', team_id=team.id)
-        else:
-            form = TeamMemberForm()
-        
-        return render(request, 'teams/member_form.html', {
-            'form': form,
-            'team': team
-        })
-    except:
-        messages.warning(request, 'The team you are looking for does not exist or has been deleted.')
-        return redirect('teams:team_list')
+    team = get_object_or_404(Team, id=team_id)
+    if request.method == 'POST':
+        form = TeamMemberForm(request.POST)
+        if form.is_valid():
+            user = form.cleaned_data['user']
+            if user not in team.members.all():
+                team.members.add(user)
+                
+                # Create notification for the added member
+                create_notification(
+                    recipient=user,
+                    actor=request.user,
+                    verb=f"added you as a member to team '{team.name}'",
+                    content_object=team
+                )
+                
+                # Notify team lead if they're not the one adding the member
+                if team.team_lead != request.user:
+                    create_notification(
+                        recipient=team.team_lead,
+                        actor=request.user,
+                        verb=f"added {user.username} to team '{team.name}'",
+                        content_object=team
+                    )
+                
+                messages.success(request, f'{user.username} has been added to the team.')
+            else:
+                messages.warning(request, f'{user.username} is already a team member.')
+            return redirect('teams:team_detail', team_id=team.id)
+    else:
+        form = TeamMemberForm()
+    
+    return render(request, 'teams/member_form.html', {
+        'form': form,
+        'team': team
+    })
 
 @login_required
 def remove_member(request, team_id, user_id):

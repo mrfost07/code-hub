@@ -90,41 +90,31 @@ def notify_project_action(project, actor, action_verb):
             content_object=project
         )
 
-def notify_task_action(task, actor, action_verb):
+def notify_task_action(task, actor, action_verb, recipient=None):
     """
-    Create notifications for relevant users when a task action occurs
+    Create notifications for task actions
     
     Args:
         task: The Task instance
         actor: User who performed the action
-        action_verb: String describing the action (e.g., "created a task", "updated a task status")
+        action_verb: String describing the action
+        recipient: Specific recipient (optional)
     """
-    # Notify task owner if different from actor
-    if task.owner != actor:
+    if recipient:
+        # Create notification for specific recipient
         create_notification(
-            recipient=task.owner,
+            recipient=recipient,
             actor=actor,
             verb=action_verb,
             content_object=task
         )
-    
-    # Notify project owner if different from actor and task owner
-    if task.project.owner != actor and task.project.owner != task.owner:
-        create_notification(
-            recipient=task.project.owner,
-            actor=actor,
-            verb=action_verb,
-            content_object=task
-        )
-    
-    # Also notify all team members about the task update
-    if hasattr(task.project, 'team') and task.project.team:
-        for member in task.project.team.members.all():
-            # Don't notify the actor or people already notified
-            if member != actor and member != task.owner and member != task.project.owner:
+    else:
+        # Notify all assigned users
+        for assignee in task.assigned_to.all():
+            if assignee != actor:
                 create_notification(
-                    recipient=member,
+                    recipient=assignee,
                     actor=actor,
                     verb=action_verb,
                     content_object=task
-                ) 
+                )

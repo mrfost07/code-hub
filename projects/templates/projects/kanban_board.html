@@ -40,7 +40,12 @@
           <div class="card-body">
             <div class="kanban-column" data-status="{{ column.status }}">
               {% for task in column.tasks %}
-              <div class="card mb-2 task-card" data-task-id="{{ task.id }}">
+              <div class="card mb-2 task-card" data-task-id="{{ task.id }}"
+                   {% if request.user in task.assigned_to.all %}
+                   draggable="true"
+                   {% else %}
+                   draggable="false"
+                   {% endif %}>
                 <div class="card-body p-2">
                   <h5 class="card-title">{{ task.name }}</h5>
                   <p class="card-text small">{{ task.description|truncatechars:50 }}</p>
@@ -49,11 +54,25 @@
                          style="width: {{ task.progress }}%"></div>
                   </div>
                   <div class="mt-2">
-                    <small class="text-muted">{{ task.owner.username }}</small>
+                    <small class="text-muted">Created by: {{ task.owner.username }}</small>
                     <span class="badge badge-{{ task.priority|lower }} float-right">
                       {{ task.priority }}
                     </span>
                   </div>
+                  {% if task.assigned_to.all %}
+                  <div class="mt-1">
+                    <small class="text-muted">Assigned to: 
+                      {% for member in task.assigned_to.all %}
+                        {{ member.username }}{% if not forloop.last %}, {% endif %}
+                      {% endfor %}
+                    </small>
+                  </div>
+                  {% endif %}
+                  {% if request.user not in task.assigned_to.all %}
+                  <div class="alert alert-warning mt-2 mb-0 p-1 text-center">
+                    <small>You are not assigned to this task</small>
+                  </div>
+                  {% endif %}
                 </div>
               </div>
               {% empty %}

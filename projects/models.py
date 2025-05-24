@@ -35,7 +35,7 @@ class ProjectManager(models.Manager):
 class Project(models.Model):
     owner = models.ForeignKey(User, on_delete=models.CASCADE, related_name='projects')
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    team = models.ForeignKey(Team, related_name="projects", on_delete=models.CASCADE)
+    team = models.ForeignKey(Team, related_name="projects", on_delete=models.CASCADE, null=True, blank=True)
     name = models.CharField(max_length=255)
     description = models.TextField(blank=True, null=True)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="To Do")

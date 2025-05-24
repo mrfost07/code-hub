@@ -13,4 +13,5 @@ urlpatterns = [
     path('task/<uuid:pk>/delete/', views.TaskDeleteView.as_view(), name='task_delete'),
     path('api/tasks/<uuid:task_id>/update-status/', views.update_task_status, name='update_task_status'),
     path('<uuid:task_id>/update-status/', views.update_task_status, name='update_task_status'),
+    path('project/<int:project_id>/members/', views.get_project_members, name='get_project_members'),
 ]

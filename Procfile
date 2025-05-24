@@ -1,1 +1,1 @@
-web: gunicorn swifthub.wsgi --log-file - --bind 0.0.0.0:$PORT 
+web: python manage.py migrate && python manage.py create_superuser && python manage.py collectstatic --noinput && gunicorn swifthub.wsgi

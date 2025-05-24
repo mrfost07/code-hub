@@ -10,8 +10,9 @@ from django.views.generic.edit import UpdateView, DeleteView
 from django.http import JsonResponse
 from django.views.decorators.http import require_http_methods
 import json
-from notifications.utils import notify_task_action
+from notifications.utils import notify_task_action, create_notification
 from django.db.models import Q
+from notifications.models import Notification
 
 @login_required
 def task_list(request):
@@ -60,39 +61,56 @@ def task_detail(request, task_id):
 @login_required
 def task_create(request):
     if request.method == 'POST':
-        form = TaskForm(request.POST)
+        form = TaskForm(request.POST, user=request.user)
         if form.is_valid():
             task = form.save(commit=False)
             task.owner = request.user
-            
-            # Explicitly set status from form data to ensure it's preserved
-            task.status = form.cleaned_data['status']
-            
-            # Ensure the task is active
-            task.active = True
             task.save()
             
-            # Create notification
-            if task.project:
-                notify_task_action(task, request.user, f"created a new task '{task.name}' in project '{task.project.name}'")
+            # Handle assignees
+            assignees = form.cleaned_data.get('assigned_to')
+            if assignees:
+                task.assigned_to.set(assignees)
+                
+                # Notify each assigned member
+                for assignee in assignees:
+                    if assignee != request.user:  # Don't notify the task creator
+                        create_notification(
+                            recipient=assignee,
+                            actor=request.user,
+                            verb=f"assigned you to task '{task.name}' in project '{task.project.name}'",
+                            content_object=task
+                        )
+            else:
+                # If no assignees selected, assign to task creator
+                task.assigned_to.add(request.user)
             
-            messages.success(request, 'Task created successfully!')
-            # If task is created within a project, redirect to that project's kanban board
-            if task.project:
-                return redirect('projects:kanban_board', project_id=task.project.id)
-            return redirect('tasks:task_detail', task_id=task.id)
+            # Notify project owner if different from task creator
+            if task.project and request.user != task.project.owner:
+                create_notification(
+                    recipient=task.project.owner,
+                    actor=request.user,
+                    verb=f"created a new task '{task.name}' in project '{task.project.name}'",
+                    content_object=task
+                )
+            
+            return redirect('projects:kanban_board', project_id=task.project.id)
     else:
-        # Set a default status of TODO for new tasks
-        form = TaskForm(initial={'status': 'TODO'})
-        
-        # Limit projects to ones the user has access to (owned by user or in teams user belongs to)
-        user_projects = Project.objects.filter(
-            Q(owner=request.user) | 
-            Q(team__members=request.user)
-        ).distinct()
-        form.fields['project'].queryset = user_projects
-        
-    return render(request, 'tasks/task_form.html', {'form': form, 'title': 'Create Task'})
+        initial = {}
+        project_id = request.GET.get('project')
+        if project_id:
+            try:
+                project = Project.objects.get(id=project_id)
+                initial['project'] = project
+            except Project.DoesNotExist:
+                pass
+                
+        form = TaskForm(user=request.user, initial=initial)
+    
+    return render(request, 'tasks/task_form.html', {
+        'form': form,
+        'title': 'Create Task'
+    })
 
 @login_required 
 def task_update(request, task_id):
@@ -136,33 +154,65 @@ def task_update(request, task_id):
 @login_required
 def create_project_task(request, project_id):
     project = get_object_or_404(Project, id=project_id)
+    
     if request.method == 'POST':
-        form = TaskForm(request.POST)
+        form = TaskForm(request.POST, user=request.user, project=project)
         if form.is_valid():
             task = form.save(commit=False)
             task.project = project
             task.owner = request.user
-            
-            # Explicitly set status from form data to ensure it's preserved
             task.status = form.cleaned_data['status']
-            
-            # Ensure the task is active
             task.active = True
-            task.save()
             
-            # Create notification
-            notify_task_action(task, request.user, f"created a new task '{task.name}' in project '{project.name}'")
+            # Get the original task name
+            original_name = form.cleaned_data['name']
+            
+            # Handle assignees
+            assignees = []
+            if request.user == project.owner:
+                # Project owner can select assignees
+                assignees = form.cleaned_data.get('assigned_to')
+                if assignees:
+                    # Modify task name to include assignee names
+                    assignee_names = [user.username for user in assignees]
+                    task.name = f"{original_name} ({', '.join(assignee_names)})"
+                    task.save()
+                    task.assigned_to.set(assignees)
+                    
+                    # Notify each assigned member
+                    for assignee in assignees:
+                        if assignee != request.user:  # Don't notify the task creator
+                            create_notification(
+                                recipient=assignee,
+                                actor=request.user,
+                                verb=f"assigned you to task '{task.name}' in project '{project.name}'",
+                                content_object=task
+                            )
+                else:
+                    task.save()
+                    task.assigned_to.add(request.user)
+            else:
+                # Team members can only assign to themselves
+                task.save()
+                task.assigned_to.add(request.user)
+            
+            # Create notification for project owner about task creation
+            if request.user != project.owner:
+                create_notification(
+                    recipient=project.owner,
+                    actor=request.user,
+                    verb=f"created a new task '{task.name}' in project '{project.name}'",
+                    content_object=task
+                )
             
             messages.success(request, 'Task created successfully!')
-            # Redirect to kanban board instead of project detail
             return redirect('projects:kanban_board', project_id=project.id)
     else:
-        # Set a default status of TODO for new tasks
-        form = TaskForm(initial={'project': project, 'status': 'TODO'})
-        # Only allow selecting the current project
-        form.fields['project'].queryset = Project.objects.filter(id=project.id)
-        form.fields['project'].initial = project
-        form.fields['project'].widget.attrs['readonly'] = True
+        form = TaskForm(
+            user=request.user,
+            project=project,
+            initial={'status': 'TODO'}
+        )
     
     return render(request, 'tasks/task_form.html', {
         'form': form, 
@@ -220,12 +270,18 @@ def update_task_status(request, task_id):
     try:
         task = get_object_or_404(Task, id=task_id)
         
-        # Allow project owner, task owner, or any team member to update task status
-        is_team_member = request.user in task.project.team.members.all()
-        if not (request.user == task.owner or request.user == task.project.owner or is_team_member):
+        # Strict permission check - only assigned users can move tasks
+        if request.user not in task.assigned_to.all():
             return JsonResponse({
                 'success': False,
-                'error': 'Permission denied: You must be the task owner, project owner, or a team member'
+                'error': 'Permission denied: Only assigned members can move this task'
+            }, status=403)
+
+        # Check if user has permission to update task
+        if not task.can_user_update(request.user):
+            return JsonResponse({
+                'success': False,
+                'error': 'Permission denied: You must be assigned to this task to update it'
             }, status=403)
 
         data = json.loads(request.body)
@@ -303,3 +359,21 @@ def update_task_status(request, task_id):
             'success': False, 
             'error': str(e)
         }, status=500)
+
+@login_required
+def get_project_members(request, project_id):
+    """API endpoint to get project members for dynamic form updates"""
+    try:
+        project = get_object_or_404(Project, id=project_id)
+        # Get all team members and project owner
+        members = list(project.team.members.values('id', 'username'))
+        if project.owner not in project.team.members.all():
+            members.append({
+                'id': project.owner.id,
+                'username': project.owner.username
+            })
+        return JsonResponse({'members': members})
+    except Project.DoesNotExist:
+        return JsonResponse({'error': 'Project not found'}, status=404)
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)

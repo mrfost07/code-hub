@@ -38,3 +38,63 @@
   </div>
 </section>
 {% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const projectSelect = document.getElementById('id_project');
+    const assignedToSelect = document.getElementById('id_assigned_to');
+    const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+
+    // Function to update assignees based on selected project
+    function updateAssignees(projectId) {
+        if (!projectId) {
+            // Clear and disable assigned_to if no project selected
+            assignedToSelect.innerHTML = '';
+            assignedToSelect.disabled = true;
+            return;
+        }
+
+        // Enable the assigned_to field
+        assignedToSelect.disabled = false;
+
+        // Fetch project members
+        fetch(`/tasks/project/${projectId}/members/`, {
+            headers: {
+                'X-CSRFToken': csrfToken
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.members) {
+                // Clear existing options
+                assignedToSelect.innerHTML = '';
+                
+                // Add new options
+                data.members.forEach(member => {
+                    const option = new Option(member.username, member.id);
+                    assignedToSelect.add(option);
+                });
+            }
+        })
+        .catch(error => {
+            console.error('Error fetching project members:', error);
+            assignedToSelect.innerHTML = '<option value="">Error loading members</option>';
+        });
+    }
+
+    // Update assignees when project changes
+    projectSelect.addEventListener('change', function() {
+        updateAssignees(this.value);
+    });
+
+    // Initial update if project is pre-selected
+    if (projectSelect.value) {
+        updateAssignees(projectSelect.value);
+    } else {
+        // Disable assigned_to if no project selected
+        assignedToSelect.disabled = true;
+    }
+});
+</script>
+{% endblock %}

@@ -61,6 +61,7 @@ class Task(models.Model):
     active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    assigned_to = models.ManyToManyField(User, related_name='assigned_tasks', blank=True)
 
     objects = TaskManager()
 
@@ -122,6 +123,12 @@ class Task(models.Model):
     def save(self, *args, **kwargs):
         super().save(*args, **kwargs)
         self.update_project_progress()
+
+    def can_user_update(self, user):
+        """Check if user can update this task"""
+        return (user in self.assigned_to.all() or 
+                user == self.owner or 
+                user == self.project.owner)
 
 class TaskComment(models.Model):
     task = models.ForeignKey(Task, on_delete=models.CASCADE, related_name='comments')
