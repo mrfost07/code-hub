@@ -199,29 +199,52 @@ def profile(request, user_id=None):
 
 @login_required
 def edit_profile(request):
-    if request.method == 'POST':
-        form = UserProfileForm(request.POST, request.FILES, instance=request.user.profile)
-        if form.is_valid():
-            profile = form.save(commit=False)
-            
-            # Handle profile picture upload
-            if 'profile_picture' in request.FILES:
-                file = request.FILES['profile_picture']
-                # Create a safe filename
-                ext = file.name.split('.')[-1]
-                filename = f"{request.user.username}_{timezone.now().strftime('%Y%m%d_%H%M%S')}.{ext}"
-                profile.profile_picture.save(filename, file, save=False)
-            
-            profile.save()
-            messages.success(request, 'Your profile has been updated successfully.')
-            return redirect('accounts:profile')
-    else:
-        form = UserProfileForm(instance=request.user.profile)
-    
-    return render(request, 'accounts/edit_profile.html', {
-        'form': form,
-        'page_title': 'Edit Profile',
-    })
+    try:
+        if request.method == 'POST':
+            form = UserProfileForm(request.POST, request.FILES, instance=request.user.profile)
+            if form.is_valid():
+                profile = form.save(commit=False)
+                
+                # Handle profile picture upload
+                if 'profile_picture' in request.FILES:
+                    file = request.FILES['profile_picture']
+                    # Validate file type
+                    if not file.content_type.startswith('image/'):
+                        messages.error(request, 'Please upload a valid image file.')
+                        return render(request, 'accounts/edit_profile.html', {'form': form})
+                    
+                    # Create a safe filename
+                    ext = file.name.split('.')[-1].lower()
+                    if ext not in ['jpg', 'jpeg', 'png', 'gif']:
+                        messages.error(request, 'Please upload a valid image file (jpg, jpeg, png, or gif).')
+                        return render(request, 'accounts/edit_profile.html', {'form': form})
+                    
+                    filename = f"{request.user.username}_{timezone.now().strftime('%Y%m%d_%H%M%S')}.{ext}"
+                    try:
+                        profile.profile_picture.save(filename, file, save=False)
+                    except Exception as e:
+                        messages.error(request, f'Error uploading file: {str(e)}')
+                        return render(request, 'accounts/edit_profile.html', {'form': form})
+                
+                try:
+                    profile.save()
+                    messages.success(request, 'Your profile has been updated successfully.')
+                    return redirect('accounts:profile')
+                except Exception as e:
+                    messages.error(request, f'Error saving profile: {str(e)}')
+                    return render(request, 'accounts/edit_profile.html', {'form': form})
+            else:
+                messages.error(request, 'Please correct the errors below.')
+        else:
+            form = UserProfileForm(instance=request.user.profile)
+        
+        return render(request, 'accounts/edit_profile.html', {
+            'form': form,
+            'page_title': 'Edit Profile',
+        })
+    except Exception as e:
+        messages.error(request, f'An unexpected error occurred: {str(e)}')
+        return redirect('accounts:profile')
 
 def email_verification(request, uidb64, token):
     try:
