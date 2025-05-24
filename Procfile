@@ -1,1 +1,1 @@
-web: python manage.py migrate --noinput && python manage.py create_superuser && python manage.py collectstatic --noinput && gunicorn swifthub.wsgi
+web: python manage.py collectstatic --no-input && python manage.py migrate && gunicorn swifthub.wsgi:application -c gunicorn.conf.py
