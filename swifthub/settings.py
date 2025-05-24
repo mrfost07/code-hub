@@ -149,7 +149,7 @@ MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
 # Default user profile image - relative to MEDIA_ROOT
-DEFAULT_USER_AVATAR = 'dist/img/default-avatar.jpg'
+DEFAULT_USER_AVATAR = 'dist/img/default-150x150.png'
 
 # File Upload Settings
 FILE_UPLOAD_MAX_MEMORY_SIZE = 5242880  # 5MB

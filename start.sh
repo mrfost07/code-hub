@@ -1,8 +1,5 @@
 #!/bin/bash
 
-# Set memory limit for the entire process
-ulimit -v 512000  # 512MB virtual memory limit
-
 # Export Django settings
 export DJANGO_SETTINGS_MODULE=swifthub.settings
 export PYTHONUNBUFFERED=1
@@ -17,9 +14,15 @@ chmod -R 755 staticfiles
 
 # Ensure default avatar exists
 echo "Setting up default avatar..."
-if [ ! -f media/dist/img/default-avatar.jpg ]; then
-    cp static/dist/img/default-150x150.png media/dist/img/default-avatar.jpg
-    chmod 644 media/dist/img/default-avatar.jpg
+if [ ! -f media/dist/img/default-150x150.png ]; then
+    cp static/dist/img/default-150x150.png media/dist/img/default-150x150.png
+    chmod 644 media/dist/img/default-150x150.png
+fi
+
+# Copy favicon
+echo "Setting up favicon..."
+if [ ! -f staticfiles/dist/img/favicon.ico ]; then
+    cp static/dist/img/favicon.ico staticfiles/dist/img/favicon.ico 2>/dev/null || :
 fi
 
 # Collect static files
@@ -34,10 +37,6 @@ python manage.py migrate --no-input
 echo "Starting Gunicorn..."
 exec gunicorn swifthub.wsgi:application \
     --config gunicorn.conf.py \
-    --workers 1 \
-    --threads 1 \
-    --worker-class sync \
-    --worker-tmp-dir /dev/shm \
     --log-level info \
     --error-logfile - \
     --access-logfile - \
