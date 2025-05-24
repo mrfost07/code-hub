@@ -28,10 +28,10 @@ SECRET_KEY = os.environ.get('SECRET_KEY', 'your-default-secret-key-for-dev')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.environ.get('DEBUG', 'False') == 'True'
 
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = ['https://code-hub-production.up.railway.app/']
 CSRF_TRUSTED_ORIGINS = [
-    'https://*.railway.app',
-    'https://*.your-domain.com',  # Add your custom domain if you have one
+    'https://code-hub-production.up.railway.app/',
+    'https://code-hub-production.up.railway.app/',  # Add your custom domain if you have one
 ]
 
 # Application definition
