@@ -89,10 +89,16 @@ WSGI_APPLICATION = 'swifthub.wsgi.application'
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
 
 DATABASES = {
-    'default': dj_database_url.config(
-        default='sqlite:///' + str(BASE_DIR / 'db.sqlite3'),
-        conn_max_age=600
-    )
+    'default': {
+        **dj_database_url.config(
+            default='sqlite:///' + str(BASE_DIR / 'db.sqlite3'),
+            conn_max_age=60  # Reduced connection age
+        ),
+        'CONN_MAX_AGE': 60,
+        'OPTIONS': {
+            'timeout': 20,
+        }
+    }
 }
 
 
@@ -135,7 +141,8 @@ STATIC_ROOT = BASE_DIR / 'staticfiles'
 STATICFILES_DIRS = [
     BASE_DIR / 'static',
 ]
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedStaticFilesStorage'  # Less memory intensive
+WHITENOISE_MAX_AGE = 31536000  # Cache static files for 1 year
 
 
 
@@ -204,15 +211,15 @@ if not DEBUG:
     SECURE_HSTS_PRELOAD = True
 
 # Memory optimization settings
-DATA_UPLOAD_MAX_MEMORY_SIZE = 2621440  # 2.5 MB
-FILE_UPLOAD_MAX_MEMORY_SIZE = 2621440  # 2.5 MB
+DATA_UPLOAD_MAX_MEMORY_SIZE = 1048576  # 1 MB
+FILE_UPLOAD_MAX_MEMORY_SIZE = 1048576  # 1 MB
 TEMPLATE_LOADERS = (
     ('django.template.loaders.cached.Loader', [
         'django.template.loaders.filesystem.Loader',
         'django.template.loaders.app_directories.Loader',
     ]),
 )
-SESSION_ENGINE = 'django.contrib.sessions.backends.cached_db'
+SESSION_ENGINE = 'django.contrib.sessions.backends.db'  # Use DB instead of cache for reliability
 
 # Cache settings
 CACHES = {
@@ -220,8 +227,36 @@ CACHES = {
         'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
         'LOCATION': 'unique-snowflake',
         'OPTIONS': {
-            'MAX_ENTRIES': 1000,
-            'CULL_FREQUENCY': 3
+            'MAX_ENTRIES': 500,  # Reduced from 1000
+            'CULL_FREQUENCY': 2
         }
     }
 }
+
+# Logging settings to reduce memory usage
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': True,
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+            'level': 'WARNING',
+        },
+    },
+    'root': {
+        'handlers': ['console'],
+        'level': 'WARNING',
+    },
+}
+
+# Additional optimizations
+MIDDLEWARE = [
+    'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
+    'django.contrib.sessions.middleware.SessionMiddleware',
+    'django.middleware.common.CommonMiddleware',
+    'django.middleware.csrf.CsrfViewMiddleware',
+    'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'django.contrib.messages.middleware.MessageMiddleware',
+    'django.middleware.clickjacking.XFrameOptionsMiddleware',
+]

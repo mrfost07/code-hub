@@ -1,20 +1,22 @@
 import multiprocessing
 
-# Reduce number of workers for Railway's memory constraints
-workers = 2  # Using fixed number instead of CPU-based calculation
+# Absolute minimum worker configuration
+workers = 1  # Single worker
+threads = 4  # Use threads instead of multiple workers
 
 # Type of worker processes
-worker_class = 'sync'
+worker_class = 'gthread'  # Using threads instead of processes
 
 # Reduce max simultaneous clients
-worker_connections = 100
+worker_connections = 50
 
-# Tune worker lifecycle to prevent memory leaks
-max_requests = 500
-max_requests_jitter = 50
+# Aggressive memory settings
+max_requests = 250
+max_requests_jitter = 25
 
 # Reduce timeout
-timeout = 30
+timeout = 29
+keepalive = 2
 
 # Memory optimization
 worker_tmp_dir = '/dev/shm'
@@ -23,7 +25,7 @@ preload_app = True
 # Logging
 accesslog = '-'
 errorlog = '-'
-loglevel = 'info'
+loglevel = 'warning'  # Reduce logging overhead
 
 # Bind
 bind = "0.0.0.0:8080"
@@ -35,9 +37,13 @@ proc_name = 'codehub'
 graceful_timeout = 30
 
 # Memory limits (in MB)
-limit_request_line = 4096
-limit_request_fields = 100
-limit_request_field_size = 8190
+limit_request_line = 1024
+limit_request_fields = 50
+limit_request_field_size = 4096
+
+# Additional memory optimizations
+forwarded_allow_ips = '*'
+worker_disable_sendfile = True
 
 # SSL (uncomment if using HTTPS directly through Gunicorn)
 # keyfile = '/etc/ssl/private/your-keyfile.key'
