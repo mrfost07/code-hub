@@ -1,1 +1,1 @@
-web: python manage.py collectstatic --no-input && python manage.py migrate && gunicorn swifthub.wsgi:application -c gunicorn.conf.py
+web: chmod +x start.sh && ./start.sh

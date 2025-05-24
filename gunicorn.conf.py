@@ -1,31 +1,24 @@
 import multiprocessing
 
-# Absolute minimum worker configuration
-workers = 1  # Single worker
-threads = 4  # Use threads instead of multiple workers
+# Minimal worker configuration
+workers = 1
+worker_class = 'sync'
+threads = 1
 
-# Type of worker processes
-worker_class = 'gthread'  # Using threads instead of processes
+# Strict memory limits
+max_requests = 100
+max_requests_jitter = 10
+worker_connections = 20
 
-# Reduce max simultaneous clients
-worker_connections = 50
-
-# Aggressive memory settings
-max_requests = 250
-max_requests_jitter = 25
-
-# Reduce timeout
-timeout = 29
+# Timeouts
+timeout = 30
+graceful_timeout = 30
 keepalive = 2
 
-# Memory optimization
-worker_tmp_dir = '/dev/shm'
-preload_app = True
-
 # Logging
-accesslog = '-'
+accesslog = None
 errorlog = '-'
-loglevel = 'warning'  # Reduce logging overhead
+loglevel = 'warning'
 
 # Bind
 bind = "0.0.0.0:8080"
@@ -33,13 +26,28 @@ bind = "0.0.0.0:8080"
 # Process naming
 proc_name = 'codehub'
 
-# Graceful timeout
-graceful_timeout = 30
-
-# Memory limits (in MB)
+# Memory limits
 limit_request_line = 1024
-limit_request_fields = 50
-limit_request_field_size = 4096
+limit_request_fields = 10
+limit_request_field_size = 1024
+
+# Disable all extras
+worker_tmp_dir = '/dev/shm'
+sendfile = False
+daemon = False
+pidfile = None
+umask = 0
+user = None
+group = None
+
+# Preload for memory efficiency
+preload_app = True
+
+def on_starting(server):
+    """Set memory limit to 512MB."""
+    import resource
+    mb = 1024 * 1024
+    resource.setrlimit(resource.RLIMIT_AS, (512 * mb, 512 * mb))
 
 # Additional memory optimizations
 forwarded_allow_ips = '*'
