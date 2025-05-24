@@ -16,6 +16,4 @@ exec gunicorn swifthub.wsgi:application \
     --threads 1 \
     --worker-class sync \
     --worker-tmp-dir /dev/shm \
-    --max-requests 100 \
-    --max-requests-jitter 10 \
     --log-level warning 

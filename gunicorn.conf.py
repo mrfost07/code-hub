@@ -8,7 +8,7 @@ threads = 1
 # Strict memory limits
 max_requests = 100
 max_requests_jitter = 10
-worker_connections = 20
+worker_connections = 50
 
 # Timeouts
 timeout = 30
@@ -26,10 +26,10 @@ bind = "0.0.0.0:8080"
 # Process naming
 proc_name = 'codehub'
 
-# Memory limits
-limit_request_line = 1024
-limit_request_fields = 10
-limit_request_field_size = 1024
+# Request limits - adjusted for normal HTTP traffic
+limit_request_line = 8190
+limit_request_fields = 100
+limit_request_field_size = 8190
 
 # Disable all extras
 worker_tmp_dir = '/dev/shm'
