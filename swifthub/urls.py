@@ -19,12 +19,14 @@ from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
 from django.views.static import serve
-from .views import dashboard, search
+from django.views.generic import RedirectView
+from accounts.views import DashboardView
+from . import views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', dashboard, name='dashboard'),
-    path('search/', search, name='search'),
+    path('', DashboardView.as_view(), name='dashboard'),
+    path('search/', views.search, name='search'),
     path('accounts/', include('accounts.urls')),
     path('projects/', include('projects.urls')),
     path('tasks/', include('tasks.urls')),
