@@ -1,4 +1,4 @@
-<footer class="main-footer py-4" id="main-footer">
+<footer class="main-footer py-2" id="main-footer">
     <style>
       .main-footer {
         position: fixed;
@@ -6,20 +6,71 @@
         left: 0;
         right: 0;
         background: var(--dark-secondary);
-        backdrop-filter: blur(10px);
-        -webkit-backdrop-filter: blur(10px);
+        backdrop-filter: blur(8px);
+        -webkit-backdrop-filter: blur(8px);
         border-top: 1px solid rgba(255,255,255,0.1);
         opacity: 0;
         visibility: hidden;
         transform: translateY(100%);
-        transition: all 0.4s ease;
+        transition: all 0.3s ease;
         z-index: 1000;
+        padding: 0.5rem 0;
+        height: auto;
+        min-height: 40px;
       }
       
       .main-footer.visible {
-        opacity: 1;
+        opacity: 0.95;
         visibility: visible;
         transform: translateY(0);
+      }
+
+      .main-footer .container-fluid {
+        max-width: 1200px;
+        margin: 0 auto;
+      }
+
+      .footer-content {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        font-size: 0.9rem;
+      }
+
+      .footer-brand {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+      }
+
+      .footer-brand i {
+        font-size: 1.2rem;
+      }
+
+      .footer-brand h4 {
+        font-size: 1rem;
+        margin: 0;
+      }
+
+      .footer-links {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+      }
+
+      @media (max-width: 768px) {
+        .main-footer {
+          padding: 0.35rem 0;
+        }
+
+        .footer-brand p,
+        .footer-copyright p:last-child {
+          display: none;
+        }
+
+        .footer-links .badge {
+          display: none;
+        }
       }
     </style>
     <script>
@@ -58,40 +109,31 @@
       });
     </script>
     <div class="container-fluid">
-      <div class="row align-items-center">
-        <div class="col-lg-4 mb-4 mb-lg-0">
-          <div class="d-flex align-items-center">
-            <i class="fas fa-code text-primary fa-2x mr-3"></i>
-            <div>
-              <h4 class="mb-0 font-weight-bold">CodeHub</h4>
-              <p class="text-muted mb-0">Empowering Development Teams</p>
-            </div>
+      <div class="footer-content">
+        <div class="footer-brand">
+          <i class="fas fa-code text-primary"></i>
+          <div>
+            <h4 class="font-weight-bold">CodeHub</h4>
+            <p class="text-muted mb-0 small">Empowering Development Teams</p>
           </div>
         </div>
-        <div class="col-lg-4 mb-4 mb-lg-0">
-          <div class="d-flex justify-content-lg-center">
-            <div>
-              <p class="mb-0 text-muted">
-                <i class="far fa-copyright mr-2"></i>2025 CodeHub
-              </p>
-              <p class="mb-0 text-muted small">All rights reserved.</p>
-            </div>
-          </div>
+        
+        <div class="footer-copyright text-muted">
+          <p class="mb-0 small"><i class="far fa-copyright mr-1"></i>2025 CodeHub</p>
         </div>
-        <div class="col-lg-4">
-          <div class="d-flex justify-content-lg-end align-items-center">
-            <span class="badge badge-primary px-3 py-2 mr-4">Version 2.0</span>
-            <div class="social-links">
-              <a href="#" class="text-muted hover-primary mr-3" title="GitHub">
-                <i class="fab fa-github fa-lg"></i>
-              </a>
-              <a href="#" class="text-muted hover-primary mr-3" title="Twitter">
-                <i class="fab fa-twitter fa-lg"></i>
-              </a>
-              <a href="#" class="text-muted hover-primary" title="LinkedIn">
-                <i class="fab fa-linkedin fa-lg"></i>
-              </a>
-            </div>
+
+        <div class="footer-links">
+          <span class="badge badge-primary px-2 py-1">v2.0</span>
+          <div class="social-links">
+            <a href="#" class="text-muted hover-primary" title="GitHub">
+              <i class="fab fa-github"></i>
+            </a>
+            <a href="#" class="text-muted hover-primary mx-2" title="Twitter">
+              <i class="fab fa-twitter"></i>
+            </a>
+            <a href="#" class="text-muted hover-primary" title="LinkedIn">
+              <i class="fab fa-linkedin"></i>
+            </a>
           </div>
         </div>
       </div>
