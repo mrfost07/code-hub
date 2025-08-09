@@ -3,6 +3,85 @@
 {% block title %}Teams{% endblock %}
 
 {% block content %}
+<style>
+  .teams-grid {
+    display: grid;
+    grid-gap: 1.5rem;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  }
+
+  .team-card {
+    height: 100%;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    background: var(--dark-secondary);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 10px;
+  }
+
+  .team-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+  }
+
+  .team-card .card-header {
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+    padding: 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .team-card .card-body {
+    padding: 1.25rem;
+  }
+
+  .team-card .card-footer {
+    background: rgba(0,0,0,0.1);
+    border-top: 1px solid rgba(255,255,255,0.1);
+  }
+
+  .team-card .nav-link {
+    padding: 0.75rem 1.25rem;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+    color: var(--light-color);
+  }
+
+  .team-card .nav-link:last-child {
+    border-bottom: none;
+  }
+
+  .team-card .badge {
+    padding: 0.4em 0.8em;
+    font-size: 0.85em;
+  }
+
+  @media (max-width: 768px) {
+    .teams-grid {
+      grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+      grid-gap: 1rem;
+    }
+
+    .team-card .card-header {
+      padding: 0.75rem;
+    }
+
+    .team-card .card-body {
+      padding: 1rem;
+    }
+
+    .team-card .nav-link {
+      padding: 0.6rem 1rem;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .teams-grid {
+      grid-template-columns: 1fr;
+      padding: 0 0.5rem;
+    }
+  }
+</style>
+
 <section class="content-header">
   <div class="container-fluid">
     <div class="row mb-2">
@@ -21,10 +100,9 @@
 
 <section class="content">
   <div class="container-fluid">
-    <div class="row">
+    <div class="teams-grid">
       {% for team in teams %}
-      <div class="col-md-4">
-        <div class="card card-widget widget-user-2">
+        <div class="card team-card">
           <div class="card-header">
             <h3 class="card-title">{{ team.name }}</h3>
             <div class="card-tools">
@@ -52,17 +130,14 @@
             </ul>
           </div>
         </div>
-      </div>
       {% empty %}
-      <div class="col-12">
-        <div class="alert alert-info">
-          No teams found. Create a new team to get started.
-        </div>
+      <div class="alert alert-info">
+        No teams found. Create a new team to get started.
       </div>
       {% endfor %}
     </div>
     
-    <div class="row mt-4">
+    <div class="row mt-4 mb-5 pb-4">
       <div class="col-12">
         <a href="{% url 'teams:team_create' %}" class="btn btn-success">
           <i class="fas fa-plus"></i> Create New Team

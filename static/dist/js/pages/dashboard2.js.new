@@ -1,0 +1,124 @@
+/* global Chart:false */
+
+$(function () {
+  'use strict';
+
+  // Sales Chart
+  function initSalesChart() {
+    var salesChart = $('#salesChart');
+    if (!salesChart.length) {
+      return;
+    }
+
+    var ctx = salesChart.get(0).getContext('2d');
+    if (!ctx) {
+      return;
+    }
+
+    new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: ['January', 'February', 'March', 'April', 'May', 'June', 'July'],
+        datasets: [{
+          label: 'Digital Goods',
+          backgroundColor: 'rgba(60,141,188,0.9)',
+          borderColor: 'rgba(60,141,188,0.8)',
+          pointRadius: false,
+          pointColor: '#3b8bba',
+          pointStrokeColor: 'rgba(60,141,188,1)',
+          pointHighlightFill: '#fff',
+          pointHighlightStroke: 'rgba(60,141,188,1)',
+          data: [28, 48, 40, 19, 86, 27, 90]
+        }]
+      },
+      options: {
+        maintainAspectRatio: false,
+        responsive: true,
+        legend: {
+          display: false
+        },
+        scales: {
+          xAxes: [{
+            gridLines: {
+              display: false
+            }
+          }],
+          yAxes: [{
+            gridLines: {
+              display: false
+            }
+          }]
+        }
+      }
+    });
+  }
+
+  // Pie Chart
+  function initPieChart() {
+    var pieChart = $('#pieChart');
+    if (!pieChart.length) {
+      return;
+    }
+
+    var ctx = pieChart.get(0).getContext('2d');
+    if (!ctx) {
+      return;
+    }
+
+    new Chart(ctx, {
+      type: 'doughnut',
+      data: {
+        labels: [
+          'Chrome',
+          'IE',
+          'FireFox',
+          'Safari',
+          'Opera',
+          'Navigator'
+        ],
+        datasets: [{
+          data: [700, 500, 400, 600, 300, 100],
+          backgroundColor: ['#f56954', '#00a65a', '#f39c12', '#00c0ef', '#3c8dbc', '#d2d6de']
+        }]
+      },
+      options: {
+        maintainAspectRatio: false,
+        responsive: true,
+        legend: {
+          display: false
+        }
+      }
+    });
+  }
+
+  // World Map
+  function initWorldMap() {
+    var worldMap = $('#world-map-markers');
+    if (!worldMap.length) {
+      return;
+    }
+
+    try {
+      worldMap.mapael({
+        map: {
+          name: 'usa_states',
+          zoom: {
+            enabled: true,
+            maxLevel: 10
+          }
+        }
+      });
+    } catch (e) {
+      console.warn('Failed to initialize world map:', e);
+    }
+  }
+
+  // Initialize all charts
+  try {
+    initSalesChart();
+    initPieChart();
+    initWorldMap();
+  } catch (e) {
+    console.warn('Error initializing dashboard:', e);
+  }
+});

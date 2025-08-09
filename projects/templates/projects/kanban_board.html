@@ -4,6 +4,81 @@
 {% block title %}{{ project.name }} - Kanban Board{% endblock %}
 
 {% block content %}
+<style>
+  /* Kanban Board Responsive Styles */
+  .kanban-container {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin;
+    padding-bottom: 10px;
+  }
+
+  .kanban-container::-webkit-scrollbar {
+    height: 6px;
+  }
+
+  .kanban-container::-webkit-scrollbar-track {
+    background: rgba(255,255,255,0.05);
+    border-radius: 3px;
+  }
+
+  .kanban-container::-webkit-scrollbar-thumb {
+    background: rgba(255,255,255,0.2);
+    border-radius: 3px;
+  }
+
+  .kanban-row {
+    display: flex;
+    flex-wrap: nowrap;
+    gap: 1rem;
+  }
+
+  .kanban-column {
+    min-height: 200px;
+  }
+
+  .kanban-col {
+    flex: 0 0 260px;
+    max-width: 260px;
+  }
+
+  .task-card {
+    font-size: 0.9rem;
+  }
+
+  .task-card .card-body {
+    padding: 0.5rem !important;
+  }
+
+  .task-card h5.card-title {
+    font-size: 0.95rem;
+    margin-bottom: 0.5rem;
+  }
+
+  @media (max-width: 768px) {
+    .kanban-col {
+      flex: 0 0 180px;
+      max-width: 180px;
+    }
+
+    .task-card {
+      font-size: 0.8rem;
+    }
+
+    .task-card h5.card-title {
+      font-size: 0.85rem;
+    }
+
+    .card-header {
+      padding: 0.5rem;
+    }
+
+    .card-header h3 {
+      font-size: 1rem;
+    }
+  }
+</style>
+
 <section class="content">
   <div class="container-fluid">
     <!-- Progress Overview -->
@@ -29,16 +104,17 @@
     </div>
 
     <!-- Kanban Columns -->
-    <div class="row">
-      {% for column in columns %}
-      <div class="col">
-        <div class="card">
-          <div class="card-header bg-{{ column.color }}">
-            <h3 class="card-title">{{ column.title }}</h3>
-            <span class="badge badge-light float-right">{{ column.tasks|length }}</span>
-          </div>
-          <div class="card-body">
-            <div class="kanban-column" data-status="{{ column.status }}">
+    <div class="kanban-container">
+      <div class="kanban-row">
+        {% for column in columns %}
+        <div class="kanban-col">
+          <div class="card">
+            <div class="card-header bg-{{ column.color }}">
+              <h3 class="card-title">{{ column.title }}</h3>
+              <span class="badge badge-light float-right">{{ column.tasks|length }}</span>
+            </div>
+            <div class="card-body p-2">
+              <div class="kanban-column" data-status="{{ column.status }}">
               {% for task in column.tasks %}
               <div class="card mb-2 task-card" data-task-id="{{ task.id }}"
                    {% if request.user in task.assigned_to.all %}

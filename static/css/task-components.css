@@ -1,0 +1,175 @@
+/* Task Components */
+.task-list-container {
+    background: var(--dark-secondary);
+    border-radius: var(--border-radius-lg);
+    padding: 1.5rem;
+}
+
+.task-filters {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 2rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.task-filter-btn {
+    padding: 0.5rem 1rem;
+    border-radius: var(--border-radius-sm);
+    font-size: 0.875rem;
+    color: var(--gray-color);
+    background: transparent;
+    transition: all 0.2s ease;
+}
+
+.task-filter-btn:hover,
+.task-filter-btn.active {
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--light-color);
+}
+
+.task-item {
+    background: var(--dark-color);
+    border-radius: var(--border-radius-md);
+    padding: 1rem;
+    margin-bottom: 1rem;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+}
+
+.task-item:hover {
+    border-color: rgba(255, 255, 255, 0.1);
+    transform: translateX(5px);
+}
+
+.task-checkbox {
+    position: relative;
+    width: 20px;
+    height: 20px;
+    margin-top: 0.25rem;
+}
+
+.task-checkbox input[type="checkbox"] {
+    opacity: 0;
+    position: absolute;
+}
+
+.checkbox-custom {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 20px;
+    height: 20px;
+    border: 2px solid var(--gray-color);
+    border-radius: var(--border-radius-sm);
+    transition: all 0.2s ease;
+}
+
+.task-checkbox input[type="checkbox"]:checked + .checkbox-custom {
+    background: var(--success-color);
+    border-color: var(--success-color);
+}
+
+.checkbox-custom::after {
+    content: '';
+    position: absolute;
+    top: 4px;
+    left: 4px;
+    width: 8px;
+    height: 8px;
+    opacity: 0;
+    background: var(--light-color);
+    border-radius: 1px;
+    transition: all 0.2s ease;
+}
+
+.task-checkbox input[type="checkbox"]:checked + .checkbox-custom::after {
+    opacity: 1;
+}
+
+.task-content {
+    flex: 1;
+}
+
+.task-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 0.5rem;
+}
+
+.task-title {
+    font-size: 1rem;
+    font-weight: 500;
+    color: var(--light-color);
+    margin: 0;
+}
+
+.task-priority {
+    padding: 0.25rem 0.75rem;
+    border-radius: 2rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.priority-high {
+    background: rgba(var(--danger-rgb), 0.1);
+    color: var(--danger-color);
+}
+
+.priority-medium {
+    background: rgba(var(--warning-rgb), 0.1);
+    color: var(--warning-color);
+}
+
+.priority-low {
+    background: rgba(var(--success-rgb), 0.1);
+    color: var(--success-color);
+}
+
+.task-meta {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    margin-top: 1rem;
+}
+
+.meta-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.75rem;
+    color: var(--gray-color);
+}
+
+.meta-item i {
+    font-size: 0.875rem;
+}
+
+.task-actions {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.task-action-btn {
+    width: 32px;
+    height: 32px;
+    border-radius: var(--border-radius-sm);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--gray-color);
+    background: rgba(255, 255, 255, 0.05);
+    transition: all 0.2s ease;
+}
+
+.task-action-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--light-color);
+    transform: translateY(-2px);
+}

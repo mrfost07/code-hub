@@ -4,10 +4,315 @@
 
 {% block content %}
 
+<style>
+  /* Dashboard Layout Improvements */
+  .container-fluid {
+    padding: 1rem;
+  }
+
+  /* Dashboard Stats Responsiveness */
+  .stats-row {
+    display: flex;
+    overflow-x: auto;
+    padding-bottom: 10px;
+    scrollbar-width: thin;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .stats-row::-webkit-scrollbar {
+    height: 6px;
+  }
+
+  .stats-row::-webkit-scrollbar-track {
+    background: rgba(255,255,255,0.05);
+    border-radius: 3px;
+  }
+
+  .stats-row::-webkit-scrollbar-thumb {
+    background: rgba(255,255,255,0.2);
+    border-radius: 3px;
+  }
+
+  .info-box {
+    min-height: 100px;
+    margin-bottom: 1rem;
+    display: flex;
+    flex: 0 0 auto;
+    min-width: 250px;
+    transition: all 0.3s ease;
+    background: var(--dark-secondary);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 12px;
+  }
+
+  .info-box:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+  }
+
+  .info-box-icon {
+    min-width: 80px;
+    width: 80px;
+    height: 80px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+    border-radius: 10px;
+    margin: 10px;
+  }
+
+  .info-box-content {
+    padding: 1rem;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+
+  .info-box-text {
+    font-size: 1.1rem;
+    font-weight: 500;
+    margin-bottom: 0.5rem;
+    color: var(--light-color);
+  }
+
+  .info-box-number {
+    font-size: 1.75rem;
+    font-weight: 600;
+    color: var(--primary-color);
+  }
+
+  /* Card Improvements */
+  .cards-container {
+    display: flex;
+    overflow-x: auto;
+    padding-bottom: 10px;
+    gap: 1rem;
+    scrollbar-width: thin;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .cards-container::-webkit-scrollbar {
+    height: 6px;
+  }
+
+  .cards-container::-webkit-scrollbar-track {
+    background: rgba(255,255,255,0.05);
+    border-radius: 3px;
+  }
+
+  .cards-container::-webkit-scrollbar-thumb {
+    background: rgba(255,255,255,0.2);
+    border-radius: 3px;
+  }
+
+  .card {
+    margin-bottom: 1.5rem;
+    border-radius: 12px;
+    background: var(--dark-secondary);
+    border: 1px solid rgba(255,255,255,0.1);
+    flex: 0 0 auto;
+    min-width: 300px;
+  }
+
+  .card-header {
+    padding: 1.25rem;
+    background: rgba(255,255,255,0.02);
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+  }
+
+  .card-body {
+    padding: 1.5rem;
+  }
+
+  /* Table Responsiveness */
+  .table-responsive {
+    border-radius: 8px;
+    background: var(--dark-secondary);
+    margin-bottom: 1rem;
+  }
+
+  .table {
+    margin-bottom: 0;
+  }
+
+  /* Chart Responsiveness */
+  .chart {
+    min-height: 300px;
+    height: 300px;
+    max-height: 300px;
+    max-width: 100%;
+  }
+
+  /* Responsive Breakpoints */
+  @media (max-width: 1199.98px) {
+    .chart {
+      min-height: 250px;
+      height: 250px;
+    }
+  }
+
+  @media (max-width: 991.98px) {
+    .container-fluid {
+      padding: 0.75rem;
+    }
+
+    .card-body {
+      padding: 1.25rem;
+    }
+  }
+
+  @media (max-width: 767.98px) {
+    .info-box {
+      min-height: 90px;
+    }
+
+    .info-box-icon {
+      min-width: 70px;
+      width: 70px;
+      height: 70px;
+      font-size: 1.75rem;
+    }
+
+    .info-box-content {
+      padding: 0.75rem;
+    }
+
+    .info-box-text {
+      font-size: 1rem;
+    }
+
+    .info-box-number {
+      font-size: 1.5rem;
+    }
+
+    .chart {
+      min-height: 200px;
+      height: 200px;
+    }
+  }
+
+  @media (max-width: 575.98px) {
+    .container-fluid {
+      padding: 0.5rem;
+    }
+
+    .row {
+      flex-wrap: nowrap;
+      overflow-x: auto;
+      padding-bottom: 10px;
+      margin-right: -5px;
+      margin-left: -5px;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: thin;
+    }
+
+    .row::-webkit-scrollbar {
+      height: 6px;
+    }
+
+    .row::-webkit-scrollbar-track {
+      background: rgba(255,255,255,0.05);
+      border-radius: 3px;
+    }
+
+    .row::-webkit-scrollbar-thumb {
+      background: rgba(255,255,255,0.2);
+      border-radius: 3px;
+    }
+
+    .col-lg-3, .col-6 {
+      flex: 0 0 250px;
+      max-width: none;
+      padding-right: 5px;
+      padding-left: 5px;
+    }
+
+    .info-box {
+      min-height: 80px;
+      margin-bottom: 0.75rem;
+      width: 100%;
+    }
+
+    .info-box-icon {
+      min-width: 60px;
+      width: 60px;
+      height: 60px;
+      font-size: 1.5rem;
+      margin: 8px;
+    }
+
+    .info-box-text {
+      font-size: 0.9rem;
+      margin-bottom: 0.25rem;
+    }
+
+    .info-box-number {
+      font-size: 1.25rem;
+    }
+
+    .card {
+      margin-bottom: 1rem;
+      border-radius: 10px;
+    }
+
+    .card-header {
+      padding: 1rem;
+    }
+
+    .card-body {
+      padding: 1rem;
+    }
+
+    .chart {
+      min-height: 180px;
+      height: 180px;
+    }
+
+    /* Table scrolling on mobile */
+    .table-responsive {
+      max-height: 300px;
+      overflow-y: auto;
+    }
+
+    /* Adjust grid spacing */
+    .row {
+      margin-right: -0.5rem;
+      margin-left: -0.5rem;
+    }
+
+    .col, [class*="col-"] {
+      padding-right: 0.5rem;
+      padding-left: 0.5rem;
+    }
+    .info-box {
+      margin-bottom: 0.75rem;
+    }
+
+    .info-box-icon {
+      min-width: 70px;
+      font-size: 1.5rem;
+    }
+
+    .info-box-content {
+      padding: 0.5rem;
+    }
+
+    .info-box-text {
+      font-size: 0.875rem;
+    }
+
+    .info-box-number {
+      font-size: 1.25rem;
+    }
+  }
+</style>
+
 <div class="container-fluid">
     <!-- Info boxes -->
-    <div class="row">
-      <div class="col-12 col-sm-6 col-md-3">
+    <div class="row g-3">
+      <div class="col-6 col-md-3">
         <div class="info-box">
           <span class="info-box-icon bg-info elevation-1"><i class="fas fa-project-diagram"></i></span>
 
@@ -23,13 +328,13 @@
         <!-- /.info-box -->
       </div>
       <!-- /.col -->
-      <div class="col-12 col-sm-6 col-md-3">
-        <div class="info-box mb-3">
+      <div class="col-6 col-md-3">
+        <div class="info-box">
           <span class="info-box-icon bg-danger elevation-1"><i class="fas fa-tasks"></i></span>
 
           <div class="info-box-content">
             <span class="info-box-text">Tasks</span>
-            <span class="info-box-number"> {{ latest_task_count }}</span>
+            <span class="info-box-number">{{ latest_task_count }}</span>
           </div>
           <!-- /.info-box-content -->
         </div>
@@ -37,11 +342,8 @@
       </div>
       <!-- /.col -->
 
-      <!-- fix for small devices only -->
-      <div class="clearfix hidden-md-up"></div>
-
-      <div class="col-12 col-sm-6 col-md-3">
-        <div class="info-box mb-3">
+      <div class="col-6 col-md-3">
+        <div class="info-box">
           <span class="info-box-icon bg-success elevation-1"><i class="fas fa-users"></i></span>
 
           <div class="info-box-content">
