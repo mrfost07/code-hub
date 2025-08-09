@@ -5,7 +5,7 @@
 {% block content %}
 <div class="login-box">
   <div class="login-logo">
-    <a href="#"><b>Code</b>Hub</a>
+    <a href="#"><b>CodeHub</b></a>
   </div>
   <!-- /.login-logo -->
   <div class="card card-outline card-primary">
@@ -85,21 +85,190 @@
 <!-- Add some extra styling -->
 <style>
   .login-box {
-    box-shadow: 0 14px 28px rgba(0,0,0,0.25), 0 10px 10px rgba(0,0,0,0.22);
-    margin-top: 10vh;
+    box-shadow: var(--shadow-lg);
+    margin: 7vh auto;
+    max-width: 400px;
+    width: 90%;
+    position: relative;
+    z-index: 1;
   }
+
+  .login-box::before {
+    content: '';
+    position: absolute;
+    top: -2px;
+    left: -2px;
+    right: -2px;
+    bottom: -2px;
+    background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
+    border-radius: 12px;
+    z-index: -1;
+    filter: blur(8px);
+    opacity: 0.5;
+  }
+
   .login-logo {
-    margin-bottom: 20px;
+    margin-bottom: 1.5rem;
+    text-align: center;
   }
+
   .login-logo a {
-    color: #333;
-    text-shadow: 1px 1px 1px rgba(0,0,0,0.1);
+    color: var(--light-color);
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+    font-size: 2rem;
+    font-weight: 600;
+    letter-spacing: -0.5px;
   }
-  .btn-flat {
-    border-radius: 4px;
+
+  .login-logo b {
+    background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    font-weight: 700;
   }
+
+  .card {
+    background: var(--dark-secondary);
+    border: 1px solid rgba(255,255,255,0.1);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+  }
+
   .card-outline {
-    border-top: 3px solid #007bff;
+    border-radius: 12px;
+    overflow: hidden;
+    border: none;
+  }
+
+  .card-header {
+    background: rgba(255,255,255,0.03);
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+    padding: 1.5rem;
+  }
+
+  .card-body {
+    padding: 2rem;
+  }
+
+  .input-group {
+    margin-bottom: 1.5rem;
+  }
+
+  .input-group-text {
+    background: rgba(255,255,255,0.05);
+    border: none;
+    color: var(--gray-color);
+  }
+
+  .form-control {
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.1);
+    color: var(--light-color);
+    padding: 0.75rem 1rem;
+    height: auto;
+    transition: all 0.3s ease;
+  }
+
+  .form-control:focus {
+    background: rgba(255,255,255,0.05);
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(var(--primary-rgb), 0.25);
+  }
+
+  .btn-flat {
+    border-radius: 6px;
+    padding: 0.75rem 1.5rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    transition: all 0.3s ease;
+  }
+
+  .btn-primary {
+    background: linear-gradient(45deg, var(--primary-color), var(--primary-light));
+    border: none;
+  }
+
+  .btn-primary:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(var(--primary-rgb), 0.4);
+  }
+
+  .btn-outline-secondary {
+    border: 1px solid rgba(255,255,255,0.1);
+    background: transparent;
+    color: var(--light-color);
+  }
+
+  .btn-outline-secondary:hover {
+    background: rgba(255,255,255,0.05);
+    border-color: var(--primary-color);
+    color: var(--primary-color);
+  }
+
+  .icheck-primary label {
+    color: var(--gray-color);
+    font-size: 0.9rem;
+  }
+
+  .alert {
+    border: none;
+    border-radius: 8px;
+    padding: 1rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .alert-dismissible .close {
+    padding: 1rem;
+    color: inherit;
+  }
+
+  .social-auth-links {
+    position: relative;
+    text-align: center;
+    margin: 2rem 0;
+  }
+
+  .social-auth-links p {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--gray-color);
+  }
+
+  .social-auth-links p::before,
+  .social-auth-links p::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: rgba(255,255,255,0.1);
+    margin: 0 1rem;
+  }
+
+  @media (max-width: 576px) {
+    .login-box {
+      margin: 2vh auto;
+      width: 95%;
+    }
+
+    .card-body {
+      padding: 1.5rem;
+    }
+
+    .btn-flat {
+      padding: 0.625rem 1.25rem;
+    }
+  }
+
+  /* Fix for white selection background */
+  .form-control::selection {
+    background-color: rgba(var(--primary-rgb), 0.2) !important;
+    color: var(--light-color) !important;
+  }
+
+  .form-control::-moz-selection {
+    background-color: rgba(var(--primary-rgb), 0.2) !important;
+    color: var(--light-color) !important;
   }
 </style>
 {% endblock %} 

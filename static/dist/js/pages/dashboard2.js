@@ -1,19 +1,210 @@
 /* global Chart:false */
 
 $(function () {
-  'use strict'
+  'use strict';
+
+  function initializeDashboard() {
+    // Initialize Sales Chart
+    var salesChart = $('#salesChart');
+    if (salesChart.length > 0) {
+      var salesChartCanvas = salesChart.get(0).getContext('2d');
+      if (salesChartCanvas) {
+        var salesChartData = {
+          labels: ['January', 'February', 'March', 'April', 'May', 'June', 'July'],
+          datasets: [{
+            label: 'Digital Goods',
+            backgroundColor: 'rgba(60,141,188,0.9)',
+            borderColor: 'rgba(60,141,188,0.8)',
+            pointRadius: false,
+            pointColor: '#3b8bba',
+            pointStrokeColor: 'rgba(60,141,188,1)',
+            pointHighlightFill: '#fff',
+            pointHighlightStroke: 'rgba(60,141,188,1)',
+            data: [28, 48, 40, 19, 86, 27, 90]
+          }]
+        };
+
+        var salesChartOptions = {
+          maintainAspectRatio: false,
+          responsive: true,
+          legend: { display: false },
+          scales: {
+            xAxes: [{ gridLines: { display: false } }],
+            yAxes: [{ gridLines: { display: false } }]
+          }
+        };
+
+        new Chart(salesChartCanvas, {
+          type: 'line',
+          data: salesChartData,
+          options: salesChartOptions
+        });
+      }
+    }
+
+    // Initialize Pie Chart
+    var pieChart = $('#pieChart');
+    if (pieChart.length > 0) {
+      var pieChartCanvas = pieChart.get(0).getContext('2d');
+      if (pieChartCanvas) {
+        var pieData = {
+          labels: ['Chrome', 'IE', 'FireFox', 'Safari', 'Opera', 'Navigator'],
+          datasets: [{
+            data: [700, 500, 400, 600, 300, 100],
+            backgroundColor: ['#f56954', '#00a65a', '#f39c12', '#00c0ef', '#3c8dbc', '#d2d6de']
+          }]
+        };
+
+        new Chart(pieChartCanvas, {
+          type: 'doughnut',
+          data: pieData,
+          options: { legend: { display: false } }
+        });
+      }
+    }
+
+    // Initialize World Map
+    var worldMap = $('#world-map-markers');
+    if (worldMap.length > 0) {
+      try {
+        worldMap.mapael({
+          map: {
+            name: 'usa_states',
+            zoom: {
+              enabled: true,
+              maxLevel: 10
+            }
+          }
+        });
+      } catch (e) {
+        console.warn('Failed to initialize world map:', e);
+      }
+    }
+  }
+
+  // Initialize all components
+  try {
+    initializeDashboard();
+  } catch (e) {
+    console.warn('Error initializing dashboard:', e);
+  }
+});
+  'use strict';
+
+  // Handle missing elements gracefully
+  function safeGet(selector) {
+    return $(selector).length > 0 ? $(selector) : null;
+  }
+
+  // Safely get canvas context
+  function getContext(selector) {
+    var element = safeGet(selector);
+    return element ? element.get(0).getContext('2d') : null;
+  }
+
+  // Safely get canvas context
+  function getContext(selector) {
+    var element = $(selector);
+    return element.length > 0 ? element.get(0).getContext('2d') : null;
+  }
+
+  // Safely initialize chart
+  function initializeChart(selector, chartType, data, options) {
+    var context = getContext(selector);
+    if (!context) return null;
+    
+    try {
+      return new Chart(context, {
+        type: chartType,
+        data: data,
+        options: options
+      });
+    } catch (e) {
+      console.warn('Failed to initialize chart:', selector, e);
+      return null;
+    }
+  }
 
   /* ChartJS
    * -------
    * Here we will create a few charts using ChartJS
    */
 
-  //-----------------------
-  // - MONTHLY SALES CHART -
-  //-----------------------
+  // Initialize all charts conditionally
+  function initializeCharts() {
+    // Sales Chart
+    if ($('#salesChart').length > 0) {
+      var salesChartData = {
+        labels: ['January', 'February', 'March', 'April', 'May', 'June', 'July'],
+        datasets: [
+          {
+            label: 'Digital Goods',
+            backgroundColor: 'rgba(60,141,188,0.9)',
+            borderColor: 'rgba(60,141,188,0.8)',
+            pointRadius: false,
+            pointColor: '#3b8bba',
+            pointStrokeColor: 'rgba(60,141,188,1)',
+            pointHighlightFill: '#fff',
+            pointHighlightStroke: 'rgba(60,141,188,1)',
+            data: [28, 48, 40, 19, 86, 27, 90]
+          }
+        ]
+      };
+
+      var salesChartOptions = {
+        maintainAspectRatio: false,
+        responsive: true,
+        legend: { display: false },
+        scales: {
+          xAxes: [{ gridLines: { display: false } }],
+          yAxes: [{ gridLines: { display: false } }]
+        }
+      };
+
+      initializeChart('#salesChart', 'line', salesChartData, salesChartOptions);
+    }
+
+    // Pie Chart
+    if ($('#pieChart').length > 0) {
+      var pieData = {
+        labels: ['Chrome', 'IE', 'FireFox', 'Safari', 'Opera', 'Navigator'],
+        datasets: [{
+          data: [700, 500, 400, 600, 300, 100],
+          backgroundColor: ['#f56954', '#00a65a', '#f39c12', '#00c0ef', '#3c8dbc', '#d2d6de']
+        }]
+      };
+
+      initializeChart('#pieChart', 'doughnut', pieData, {
+        legend: { display: false }
+      });
+    }
+
+    // World Map
+    var worldMap = $('#world-map-markers');
+    if (worldMap.length > 0) {
+      try {
+        worldMap.mapael({
+          map: {
+            name: 'usa_states',
+            zoom: { enabled: true, maxLevel: 10 }
+          }
+        });
+      } catch (e) {
+        console.warn('Failed to initialize world map:', e);
+      }
+    }
+  }
+
+  // Initialize everything
+  initializeCharts();
 
   // Get context with jQuery - using jQuery's .get() method.
-  var salesChartCanvas = $('#salesChart').get(0).getContext('2d')
+  var salesChart = $('#salesChart');
+  if (salesChart.length > 0) {
+    var salesChartCanvas = salesChart.get(0).getContext('2d');
+  } else {
+    return; // Exit if chart element doesn't exist
+  }
 
   var salesChartData = {
     labels: ['January', 'February', 'March', 'April', 'May', 'June', 'July'],
@@ -104,12 +295,16 @@ $(function () {
   }
   // Create pie or douhnut chart
   // You can switch between pie and douhnut using the method below.
-  // eslint-disable-next-line no-unused-vars
-  var pieChart = new Chart(pieChartCanvas, {
-    type: 'doughnut',
-    data: pieData,
-    options: pieOptions
-  })
+  var pieChartElement = $('#pieChart');
+  if (pieChartElement.length > 0) {
+    var pieChartCanvas = pieChartElement.get(0).getContext('2d');
+    // eslint-disable-next-line no-unused-vars
+    var pieChart = new Chart(pieChartCanvas, {
+      type: 'doughnut',
+      data: pieData,
+      options: pieOptions
+    });
+  }
 
   //-----------------
   // - END PIE CHART -
@@ -119,7 +314,9 @@ $(function () {
    * ------------
    * Create a world map with markers
    */
-  $('#world-map-markers').mapael({
+  var worldMap = $('#world-map-markers');
+  if (worldMap.length > 0) {
+    worldMap.mapael({
     map: {
       name: 'usa_states',
       zoom: {

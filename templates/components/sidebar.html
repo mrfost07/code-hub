@@ -1,11 +1,153 @@
 {% load static %}
 
 <aside class="main-sidebar sidebar-dark-primary elevation-4">
+  <style>
+    /* Responsive Sidebar Improvements */
+    @media (max-width: 768px) {
+      .main-sidebar {
+        padding-top: var(--navbar-height);
+      }
+
+      .sidebar {
+        padding-bottom: 80px; /* Space for footer */
+      }
+
+      .nav-sidebar .nav-link {
+        padding: 0.75rem 1rem;
+      }
+
+      .brand-link {
+        position: fixed;
+        width: 100%;
+        top: 0;
+        z-index: 1041;
+        background: var(--dark-primary);
+        text-align: center;
+      }
+
+      .sidebar-collapse .brand-link {
+        width: 4.6rem;
+      }
+    }
+
+    /* Improved touch targets for sidebar items */
+    .nav-sidebar .nav-link {
+      position: relative;
+      display: flex;
+      align-items: center;
+      min-height: 44px;
+    }
+
+    /* Better handling of long menu items */
+    .nav-sidebar .nav-link p {
+      margin-bottom: 0;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    /* Improved search bar on mobile */
+    @media (max-width: 768px) {
+      .sidebar-search-results {
+        max-height: 60vh;
+        overflow-y: auto;
+      }
+
+      .form-inline .input-group {
+        width: 100%;
+      }
+    }
+
+    /* Better collapse/expand behavior */
+    .sidebar-collapse .main-sidebar:hover {
+      box-shadow: 0 0 20px rgba(0,0,0,0.4);
+    }
+  </style>
   <!-- Brand Logo -->
+  <style>
+    .brand-link {
+      display: flex !important;
+      align-items: center;
+      padding: 0.8rem;
+      min-height: 57px;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+    }
+
+    .brand-link .brand-image {
+      margin-left: 0.2rem;
+      margin-right: 0.7rem;
+      max-height: 33px;
+    }
+
+    .brand-link .brand-text {
+      font-size: 1.25rem;
+      font-weight: 600;
+      letter-spacing: -0.5px;
+      transition: opacity 0.3s;
+    }
+
+    @media (max-width: 768px) {
+      .sidebar-collapse .brand-text {
+        opacity: 0;
+        width: 0;
+      }
+    }
+  </style>
   <a href="{% url 'accounts:dashboard' %}" class="brand-link">
     <img src="{% static 'dist/img/AdminLTELogo.png' %}" alt="CodeHub Logo" class="brand-image img-circle elevation-3">
     <span class="brand-text font-weight-light">CodeHub</span>
   </a>
+
+  <style>
+    /* Profile Picture Improvements */
+    .sidebar .user-panel .image {
+      min-width: 40px;
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .sidebar .user-panel .image img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    /* Fix profile picture in collapsed state */
+    .sidebar-mini.sidebar-collapse .user-panel .image {
+      margin: 0 auto;
+      transition: all 0.3s ease;
+      width: 40px;
+      height: 40px;
+    }
+
+    .sidebar-mini.sidebar-collapse .user-panel {
+      justify-content: center;
+    }
+
+    /* Better transitions */
+    .sidebar-mini.sidebar-collapse .main-sidebar:hover .user-panel {
+      justify-content: flex-start;
+    }
+
+    /* Improved mobile sidebar */
+    @media (max-width: 768px) {
+      .main-sidebar {
+        width: 100%;
+        max-width: 280px;
+      }
+
+      .sidebar-mini.sidebar-collapse .main-sidebar {
+        max-width: 4.6rem;
+      }
+
+      .user-panel {
+        margin-top: 1rem !important;
+      }
+    }
+  </style>
 
   <!-- Sidebar -->
   <div class="sidebar">
